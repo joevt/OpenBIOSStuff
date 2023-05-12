@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CurrentWorkingDirectory</key>
+	<string>/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/Test/macOS</string>
+	<key>WorksheetContents</key>
+	<string>cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/Test/macOS"
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/joevt/Library/Python/2.7/bin:/opt/X11/bin:/Library/Apple/usr/bin:/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/detok/obj-amd64:/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/toke/obj-amd64:/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/macOS
+
+toke test.4th
+test.4th:74: WARNING: stack item possibly popped out of order
+test.4th:84: WARNING: stack item possibly popped out of order
+test.4th:92: WARNING: stack item possibly popped out of order
+test.4th:99: WARNING: stack item possibly popped out of order
+test.4th:109: WARNING: stack item possibly popped out of order
+test.4th:120: WARNING: stack item possibly popped out of order
+test.4th:131: WARNING: stack item possibly popped out of order
+toke: wrote 496 bytes to bytecode file 'test.fc'
+
+
+detok -t -v -a -n -o -i -m 1 test.fc &gt; All2.txt 2&gt; errors2.txt
+
+DumpPCIRom.sh test.fc &gt; test2.4th 2&gt; errors.txt
+
+bbdiff ../MPW .
+</string>
+</dict>
+</plist>

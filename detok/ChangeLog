@@ -1,0 +1,120 @@
+*********** 2023/05/11 **************************************************
+
+*** Changes by joevt
+
+ * These changes from OpenBIOS-0.99.1 have been made over the last 20 years.
+   It was first implemented as an MPW tool compiled by CodeWarrior 6.
+   The MPW scripts and CodeWarrior projects are no longer maintained.
+
+ * Changes to Makefile.
+ * Changes to dump fcode images and compiled fcode from Mac ROMs and compiled dictionaries captured from Mac RAM.
+ * Added use tabs option (for indent - instead of 4 spaces).
+ * Added ignore length option. Allows detokenizing beyond the end of an fcode image since Mac ROMs have multiple fcode images.
+ * Added Mac ROM type option. Affects interpretation of some fcodes.
+ * Added Mac ROM start option. Affects calculated addresses of compiled fcode.
+ * Allows line numbers and offsets to be output at the same time.
+ * Outputs list of fcodes that are historical (H.2) and new (H.4).
+ * For string literals, NIL does not terminate the string.
+ * For string literals, if any character is NIL and len >= 252 or any character is not printable ASCII (excluding NIL) or tab then assume all bytes are hex.
+ * For string literals, output mix of hex and ASCII as a string that can be accepted by Open Firmware and toke .
+ * Added line numbers to error messages.
+ * Unnamed fcodes will output unnamed_fcode_ with fcode number appended instead of (unnamed-fcode)
+ * Supports long offsets as used by lb?branch and lbbranch tokens of newer Mac ROMs. These are 16-bit regardless of the current offs16 setting.
+   These long branches don't come with a b(>resolve) or b(<mark) token so we add them virtually.
+ * If an 8-bit offset is 0 then it's probably an error so we switch to 16-bit offsets and try that.
+ * If a token name is bad, ignore the name and reset position to start of name.
+ * Validate length start fcode before attempting to verify checksum.
+ * Verify that indent of ; and endcase tokens matches indent of corresponding : and case tokens.
+ * Supports local variables used by fcode of Mac ROMs.
+ * Supports code,s token of newer Mac ROMs.
+   This is always used during fcode interpreting mode and is not compilable during compile mode so the (see) command
+   doesn't show what it looks like as Forth so just output it as a series of 32-bit hex literals surrounded by code<<< >>>>
+ * detok uses two passes so that it can handle forward offsets in Mac ROMs.
+ * Make sure file length is reasonable (less than 2GB).
+ * When a token is added, report it and include whether it is a predefined token. Mac ROMs will define predefined tokens.
+   When a token is added, include in the report the token category (historical, new, reserved, vendor unique, program defined, extended range, and negative range)
+   When a token is added, include in the report whether it is defined, or redefined.
+   Report when a token is renamed. Report attempts to unname a token.
+   In a Mac ROM there are multiple separate fcode images and fcode numbers are reused.
+   Sometimes, a reused fcode has the same name. Sometimes, the name is different.
+   These are not usually errors.
+ * Renamed 0x0dd compile to compile,
+ * Renamed 0x122 memory-test-issue to memory-test-suite
+ * Added 0x129 push-package
+ * Added 0x12a pop-package
+ * Added 0x168 foreground-color
+ * Added 0x169 background-color
+ * Renamed 0x20a my-package to my-parent
+ * get_byte should not read beyond end of buffer.
+ * Supports 16-bit fcode numbers for newer Mac ROMs instead of 12-bit.
+ * get_offset should return a signed number.
+ * get_string should allow strings that contain NIL characters which means it should also return a length.
+
+*********** 2003/12/14 **************************************************
+
+ * add interpose fcode
+
+*** 0.6 - 2003/11/24 ****************************************************
+
+ * minor modifications
+ * release version 0.6
+
+*********** 2003/08/16 **************************************************
+
+ * fit Makefile into openbios build process (allows out of place build)
+
+*********** 2002/07/12 **************************************************
+
+ * fix version1 headers.
+
+*** 0.5.2 - 2002/05/24 **************************************************
+
+ * fix detokenizing case..endcase expressions.
+ * update usage() and README to show all possible options
+
+*** 0.5.1 - 2002/03/30 **************************************************
+
+ * Tim Barrett <jtb@isi.edu>: add prototypes for getopt()/optind to 
+   detok.c as there seem to be some systems with an insane unistd.h.
+ * output fcode number, in case we have an unnamed fcode.
+ * make detok more silent per default.
+ * put DEBUG_ defines to Makefile (there's only one anyways).
+
+*** 0.5 - 2002/02/27 ****************************************************
+
+ * change indent size to 4
+ * added line numbers for debugging.
+ * added file offset output for debugging
+ * added checksum calculation
+ * input files.are buffered now.
+ * repair pretty print of strings.
+ * added 64bit extensions
+ * fix position decode at end of file.
+ 
+*** 0.3 - 2002/02/26 ****************************************************
+
+ * removed autogenerator (create-array, supported.h and fcode-table.raw)
+ * organized dictionary as linked list.
+ * initialize dictionary during runtime.
+
+*** 0.2.3 - 2001/12/02 **************************************************
+ 
+ * ansi compilation fixes
+ * typos in fcode-table.raw fixed.
+ * removed debugging output.
+
+*** 0.2.2 - 2001/10/04 **************************************************
+
+ * fixed wrong indentation for loops.
+ * branch direction used for indentation.
+ * new option -a, --all to decode a file after end0 occured.
+ * fixed buffer overflow bug in get_string()
+ 
+*** 0.2.1 - 2001/09/10 **************************************************
+
+ * start0-4 are no exceptional cases but normal fcode words now
+
+*** 0.2 (release) - 2001/09/09 ******************************************
+
+ * initial release
+

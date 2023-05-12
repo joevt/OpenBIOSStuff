@@ -1,0 +1,86 @@
+========================
+DumpPCIRom.sh log:
+
+# Working Path: /Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/Test/macOS
+# Script Path: /Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/macOS
+
+========================
+ConvertFCodeTokensToForth.pl log:
+
+The following were not encountered:
+
+b(lit) ffffffff
+b(lit) a-fxxxxxxx
+b(lit) 8-9xxxxxxx
+b(lit) a-f...
+new 1 num buffer:
+named 1 num buffer:
+external 1 num buffer:
+new 2 num buffer:
+named 2 num buffer:
+external 2 num buffer:
+new 1 num value
+named 1 num value
+external 1 num value
+new 2 num value
+named 2 num value
+external 2 num value
+new 2 defer
+named 2 defer
+external 2 defer
+new 2 variable
+named 2 variable
+external 2 variable
+new 1 num constant
+named 1 num constant
+external 1 num constant
+new 2 num constant
+named 2 num constant
+external 2 num constant
+new 1 num field
+named 1 num field
+external 1 num field
+new 2 num field
+named 2 num field
+external 2 num field
+new 2 :
+named 2 :
+new 2 create
+named 2 create
+external 2 create
+instance
+struct
+b(')
+b(")
+?
+1+ 1- 2+ 2-
+."
+blank
+decimal
+octal
+hex
+allot
+accept
+decode-bytes
+.d
+.h
+(.)
+3dup
+?leave
+space
+s.
+spaces
+(u.)
+3drop
+erase
+b(loop,do,?do,endof,of) negative
+b(to)
+colon_string
+colon_const
+slash definition
+
+========================
+detok log:
+
+Doing Pass 1
+Doing Pass 2

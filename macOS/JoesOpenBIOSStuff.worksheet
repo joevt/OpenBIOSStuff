@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CurrentWorkingDirectory</key>
+	<string>/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/joevt-OpenBIOSStuff</string>
+	<key>WorksheetContents</key>
+	<string>#=========================================================================================
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS"
+#git clone https://github.com/joevt/OpenBIOSStuff.git joevt-OpenBIOSStuff
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/joevt-OpenBIOSStuff"
+
+open . -a Fork.app
+
+#=========================================================================================
+# Compile detok
+
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/joevt-OpenBIOSStuff/detok"
+
+make clean
+
+make 2&gt;&amp;1
+
+#=========================================================================================
+# Compile toke
+
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/joevt-OpenBIOSStuff/toke"
+
+make clean
+
+make 2&gt;&amp;1
+
+#=========================================================================================
+# Compress all the files
+
+# Don't need this anymore since we're on github.
+
+cd  /Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS
+if [[ -f joevt-OpenBIOSStuff.zip ]]; then
+	echo "rm"
+	rm joevt-OpenBIOSStuff.zip
+fi
+find . -path "*/joevt-OpenBIOSStuff/*" -not -name ".DS_Store" -not -path "*/DerivedData*" \
+-not -path "*/obj-amd64*" -not -path "*/xcuserdata*" -not -path "*/project.xcworkspace*" \
+-print0 | xargs -0 zip -g joevt-OpenBIOSStuff.zip
+
+#=========================================================================================
+</string>
+</dict>
+</plist>

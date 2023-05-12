@@ -1,0 +1,1 @@
+cd 'Updates:Docs:Open_Firmware_and_Forth:OpenBIOS:JoesOpenBIOSStuff:Test:MPW'toke test.4thdetok -t -v -a -n -o -i -m 1 test.fc > All2.txt ³ errors2.txtDumpPCIRom test.fc > test2.4th ³ errors.txt
