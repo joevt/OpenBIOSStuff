@@ -1,0 +1,10 @@
+1)
+Add code for parsing the device tree pointers (properties and methods) for DumpMacRom / detok.
+For details, search for "device entry" in "ROM PowerPC Mac/ROM G5 Quad/compiled fcode/my notes/All.txt"
+
+2)
+Create a script to convert PowerPC assembly to tokens like the (see) command in Open Firmware.
+
+3)
+Add ability to tokenize Mac ROM Open Firmware local variables and anything else required for Mac ROM fcode images.
+This is stuff not used in PCI option ROM fcode images which toke handles perfectly already.

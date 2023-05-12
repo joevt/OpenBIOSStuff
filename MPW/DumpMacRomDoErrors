@@ -1,0 +1,1 @@
+Set tmpErrors "{TempFolder}tmpErrors"Echo -n > "{tmpErrors}"StreamEdit remainingErrors -e "/'{1}'/ Print . -AppendTo ¶"{tmpErrors}¶"; Delete" > remainingErrors2Echo "`Count -l "{tmpErrors}"` {1}" >> errorCountsCatenate "{tmpErrors}" >> errors2Close -n remainingErrors ³ Dev:Null || ()Delete remainingErrorsRename remainingErrors2 remainingErrors

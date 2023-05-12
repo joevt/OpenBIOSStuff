@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CurrentWorkingDirectory</key>
+	<string>/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/detok</string>
+	<key>WorksheetContents</key>
+	<string>#=========================================================================================
+# Compile detok
+
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/detok"
+
+make clean
+
+make 2&gt;&amp;1
+
+#=========================================================================================
+# Compile toke
+
+cd "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS/JoesOpenBIOSStuff/toke"
+
+make clean
+
+make 2&gt;&amp;1
+
+#=========================================================================================
+# Compress the files
+
+cd  /Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS
+if [[ -f JoesOpenBIOSStuff.zip ]]; then
+	echo "rm"
+	rm JoesOpenBIOSStuff.zip
+fi
+find . -path "*/JoesOpenBIOSStuff/*" -not -name ".DS_Store" -not -path "*/DerivedData*" \
+-not -path "*/obj-amd64*" -not -path "*/xcuserdata*" -not -path "*/project.xcworkspace*" \
+-print0 | xargs -0 zip -g JoesOpenBIOSStuff.zip
+
+#=========================================================================================
+</string>
+</dict>
+</plist>

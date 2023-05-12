@@ -1,0 +1,167 @@
+*********** 2023/05/11 **************************************************
+
+*** Changes by joevt
+
+ * These changes from OpenBIOS-0.99.1 have been made over the last 20 years.
+   It was first implemented as an MPW tool compiled by CodeWarrior 7.
+   The MPW scripts and CodeWarrior projects are no longer maintained.
+
+ * Changes to Makefile.
+ * Added CodeWarrior 7 build.
+ * Added 0x129 push-package
+ * Added 0x12a pop-package
+ * Added 0x168 foreground-color
+ * Added 0x169 background-color
+ * Added my-parent synonym for 0x20a my-package
+ * Added special token: instance
+ * Added special token: binary
+ * Added special token: b#
+ * Added pci-architecture . 
+ * Added pci-data-structure-start .
+ * Added pci-data-structure-length .
+ * Added set-vpd-offset .
+ * Added rom-size .
+ * ?leave is a macro, not a special.
+ * emit_byte doesn't need 0xff mask.
+ * emit_offset will warn when offset is out of range.
+ * Numbers 0, 1, 2, 3, -1 will be output as their fcode instead of as b(lit). Same for CONTROL special.
+ * d stack includes type for each element, so we can be sure we pop the expected type.
+ * PCI Class Code is a 24 bit number with class as most significant byte. It is written to PCI header as class/subclass/interface.
+ * firstchar stops at null character.
+ * get_until increments character pointer to beyond the character that was being searched for.
+ * get_sequence allows white space before and after and between hex bytes of string.
+ * get_string doesn't allow back-slash as escape character (match Apple Open Firmware behavior).
+ * get_string checks for terminating null character.
+ * get_string doesn't skip the character that is after the character that is after an escape quote " .
+ * Added lower case option to make all words lower case (as they exist in Mac ROMs)
+ * Fixed all endof offsets (calculated when endcase is encountered).
+ * Fix .( ...) and s" ..." so that the last character is not excluded.
+ * fcode-end finishes the fcode header.
+ * Assume unknown tokens exist. This allows the tokenizer to find other errors instead of just stopping.
+ * Stack errors show file line number.
+ * init_stream don't do weird things to characters > ascii 0x80.
+ * Return status -1 if error occurs.
+ * Remembers how a token is defined so a errors can be reported for operations on tokens of the wrong type.
+   Report when "to" is applied to a VARIABLE or CONST or anything else.
+   Report when "instance" is applied to a token that is not a VALUE, VARIABLE, DEFER, or BUFFER.
+
+******************* 2004/06/19 ******************************************
+ 
+ * fix off by one error in s"
+
+******************* 2004/06/10 ******************************************
+ 
+ * fix big endian problem in pci header generation.
+ * add pci-code-revision (same as pci-revision)
+
+******************* 2004/04/23 ******************************************
+
+ * remove silly warning again
+ * other minor changes and bug fixes have been included
+
+******************* 2003/12/13 ******************************************
+
+ * fix emission of device class in pci headers
+ * add encode-file keyword
+ * add interpose fcode
+
+*** 0.6 (release) - 2003/11/28 ******************************************
+
+ * make lots of functions and variables static
+ * update email address
+ * handle big output files right
+ * clean up pci header code.
+ * add pci-header-end, set-rev-level for compatibility 
+   to firmworks tokenizer.
+ * fix string escape handling
+
+******************* 2003/08/16 ******************************************
+
+ * fit Makefile into openbios build process (allows out of place build)
+ * fix address error in emit.c
+ 
+******************* 2002/07/18 ******************************************
+
+ * implement FCODE-VERSION1 and FCODE-VERSION3 (used by SUN's tokenizer)
+ * fix uneven embedded hex message for " "(00 FF FF FF FF FF FF 00)"
+
+******************* 2002/07/16 ******************************************
+
+ * implement PCI-REVISION, NOT-LAST-IMAGE
+ * implement FCODE-TIME and FCODE-DATE
+ * fix header fixup
+ * add dependencies to Makefile
+ * align to 512byte if we have a PCI header
+ * use 128k output buffer per default.
+ * rename example suffix to .fs
+ * add version1.fs, date.fs, pciexample.fs to examples
+
+******************* 2002/07/15 ******************************************
+
+ * fix CHAR/[CHAR] warnings.
+ * remove some debugging from stack.c
+ * some more line number fixes.
+ * compile with -pedantic on gcc systems
+ * fix header generation. 
+
+******************* 2002/07/12 ******************************************
+
+ * move offs16 to scanner.c
+ * generate version1 header correctly and switch
+   to 8bit offsets when it's detected.
+ * let offset16 emit it's fcode# as well
+ * implement PCI-HEADER
+
+
+******************* 2002/07/11 ******************************************
+
+ * add CHAR and [CHAR]
+ * change BUFFER to BUFFER:
+ * add H.7 renamed fcode words as macros
+ * add sample scsi driver package from IEEE 1275-1994
+ * new function emit_token supersedes emit_fcode(lookup_token())
+
+*** 0.4 (release) - 2002/05/24 ******************************************
+
+ * remove if..then from abort" (conditionally) 
+ * fix linked list juggling in case..endcase constructs
+
+******************* 2002/05/22 ******************************************
+
+ * fix get_word() not to read beyound end of strings
+ * more adequate implementation of abort"
+
+******************* 2002/03/27 ******************************************
+ 
+ * add name and endif macro
+ * fix typo in finish-device, new-device
+ * use new number parsing function to handle dots.
+ * do proper handling of hex values embedded in strings.
+ * reset fcode word number counter when compiling multiple files.
+
+******************* 2002/03/21 ******************************************
+
+ * some IEEE 1275 compliance changes (forbid definitions in definitions)
+ * fix macros
+ * fix hex, octal, decimal inside colon definitions
+
+*** 0.2a (bugfix) - 2002/03/21 ******************************************
+
+ * fix off by one bug in string escape codes
+ * fix line number calculation
+ * do proper debugging output
+
+*** 0.2 (release) - 2002/03/20 ******************************************
+
+ * implemented (most of the) missing control words
+ * implemented next-fcode tokenizer directive
+ * implemented line numbers for errors and warnings.
+ * improved string handling.
+ * stop on errors by default.
+ * use case insensitive dictionary lookup.
+ * lots of debug made compile time conditional
+
+*** 0.1 (release) - 2002/03/04 ******************************************
+
+ * initial release
+

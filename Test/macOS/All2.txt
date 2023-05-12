@@ -1,0 +1,154 @@
+     1: 000000: \ detokenizing start at offset 000000
+     2: 000000: start1 \ [0x0f1] 
+     3: 000001:   format:    0x08
+     4: 000002:   checksum:  0xc419 (ok)
+     5: 000004:   len:       0x1f0 (496 bytes)
+     6: 000008: external-token \ [0x0ca] test_begin_until 0x800
+     7: 00001C: b(:) \ [0x0b7] 
+     8: 00001D: 	b(<mark) \ [0x0b1] 
+     9: 00001E: 		b?branch \ [0x014] 0xffffffff
+    10: 000021: 	b(<mark) \ [0x0b1] 
+    11: 000022: 		. \ [0x09d] 
+    12: 000023: 		1 \ [0x0a6] 
+    13: 000024: 		b?branch \ [0x014] 0xfffffffd
+    14: 000027: 	b(;) \ [0x0c2] 
+    15: 000028: external-token \ [0x0ca] test_begin_while_repeat 0x801
+    16: 000043: b(:) \ [0x0b7] 
+    17: 000044: 	b(<mark) \ [0x0b1] 
+    18: 000045: 		b?branch \ [0x014] 0x6
+    19: 000048: 			bbranch \ [0x013] 0xfffffffc
+    20: 00004B: 		b(>resolve) \ [0x0b2] 
+    21: 00004C: 	b(<mark) \ [0x0b1] 
+    22: 00004D: 		1 \ [0x0a6] 
+    23: 00004E: 		b?branch \ [0x014] 0x7
+    24: 000051: 			2 \ [0x0a7] 
+    25: 000052: 			bbranch \ [0x013] 0xfffffffa
+    26: 000055: 		b(>resolve) \ [0x0b2] 
+    27: 000056: 	b(;) \ [0x0c2] 
+    28: 000057: external-token \ [0x0ca] test_begin_while_if 0x802
+    29: 00006E: b(:) \ [0x0b7] 
+    30: 00006F: 	b(<mark) \ [0x0b1] 
+    31: 000070: 		b?branch \ [0x014] 0x12
+    32: 000073: 			b(<mark) \ [0x0b1] 
+    33: 000074: 				b?branch \ [0x014] 0xa
+    34: 000077: 					b?branch \ [0x014] 0x3
+    35: 00007A: 						b(>resolve) \ [0x0b2] 
+    36: 00007B: 					bbranch \ [0x013] 0xfffffff8
+    37: 00007E: 				b(>resolve) \ [0x0b2] 
+    38: 00007F: 			bbranch \ [0x013] 0xfffffff0
+    39: 000082: 		b(>resolve) \ [0x0b2] 
+    40: 000083: 	b(;) \ [0x0c2] 
+    41: 000084: external-token \ [0x0ca] test_if_then 0x803
+    42: 000094: b(:) \ [0x0b7] 
+    43: 000095: 	b?branch \ [0x014] 0x3
+    44: 000098: 		b(>resolve) \ [0x0b2] 
+    45: 000099: 	1 \ [0x0a6] 
+    46: 00009A: 	b?branch \ [0x014] 0x4
+    47: 00009D: 		2 \ [0x0a7] 
+    48: 00009E: 		b(>resolve) \ [0x0b2] 
+    49: 00009F: 	b(;) \ [0x0c2] 
+    50: 0000A0: external-token \ [0x0ca] test_if_else_then 0x804
+    51: 0000B5: b(:) \ [0x0b7] 
+    52: 0000B6: 	b?branch \ [0x014] 0x6
+    53: 0000B9: 		bbranch \ [0x013] 0x4
+    54: 0000BC: 			b(>resolve) \ [0x0b2] 
+    55: 0000BD: 		b(>resolve) \ [0x0b2] 
+    56: 0000BE: 	1 \ [0x0a6] 
+    57: 0000BF: 	b?branch \ [0x014] 0x7
+    58: 0000C2: 		2 \ [0x0a7] 
+    59: 0000C3: 		bbranch \ [0x013] 0x5
+    60: 0000C6: 			b(>resolve) \ [0x0b2] 
+    61: 0000C7: 		3 \ [0x0a8] 
+    62: 0000C8: 		b(>resolve) \ [0x0b2] 
+    63: 0000C9: 	b(;) \ [0x0c2] 
+    64: 0000CA: external-token \ [0x0ca] test_begin_again 0x805
+    65: 0000DE: b(:) \ [0x0b7] 
+    66: 0000DF: 	b(<mark) \ [0x0b1] 
+    67: 0000E0: 		bbranch \ [0x013] 0xffffffff
+    68: 0000E3: 	b(<mark) \ [0x0b1] 
+    69: 0000E4: 		1 \ [0x0a6] 
+    70: 0000E5: 		bbranch \ [0x013] 0xfffffffe
+    71: 0000E8: 	b(;) \ [0x0c2] 
+    72: 0000E9: external-token \ [0x0ca] test_begin_if_else_again 0x806
+    73: 000105: b(:) \ [0x0b7] 
+    74: 000106: 	b(<mark) \ [0x0b1] 
+    75: 000107: 		b?branch \ [0x014] 0x6
+    76: 00010A: 			bbranch \ [0x013] 0x7
+    77: 00010D: 				b(>resolve) \ [0x0b2] 
+    78: 00010E: 			bbranch \ [0x013] 0xfffffff8
+    79: 000111: 		b(>resolve) \ [0x0b2] 
+    80: 000112: 	b(<mark) \ [0x0b1] 
+    81: 000113: 		1 \ [0x0a6] 
+    82: 000114: 		b?branch \ [0x014] 0x7
+    83: 000117: 			2 \ [0x0a7] 
+    84: 000118: 			bbranch \ [0x013] 0x8
+    85: 00011B: 				b(>resolve) \ [0x0b2] 
+    86: 00011C: 			3 \ [0x0a8] 
+    87: 00011D: 			bbranch \ [0x013] 0xfffffff5
+    88: 000120: 		b(>resolve) \ [0x0b2] 
+    89: 000121: 	b(;) \ [0x0c2] 
+    90: 000122: external-token \ [0x0ca] test_begin_if_again 0x807
+    91: 000139: b(:) \ [0x0b7] 
+    92: 00013A: 	b(<mark) \ [0x0b1] 
+    93: 00013B: 		b?branch \ [0x014] 0x6
+    94: 00013E: 			bbranch \ [0x013] 0xfffffffc
+    95: 000141: 		b(>resolve) \ [0x0b2] 
+    96: 000142: 	b(<mark) \ [0x0b1] 
+    97: 000143: 		1 \ [0x0a6] 
+    98: 000144: 		b?branch \ [0x014] 0x7
+    99: 000147: 			1 \ [0x0a6] 
+   100: 000148: 			bbranch \ [0x013] 0xfffffffa
+   101: 00014B: 		b(>resolve) \ [0x0b2] 
+   102: 00014C: 	b(;) \ [0x0c2] 
+   103: 00014D: external-token \ [0x0ca] test_begin_if__again 0x808
+   104: 000165: b(:) \ [0x0b7] 
+   105: 000166: 	b(<mark) \ [0x0b1] 
+   106: 000167: 		1 \ [0x0a6] 
+   107: 000168: 		b?branch \ [0x014] 0x8
+   108: 00016B: 			1 \ [0x0a6] 
+   109: 00016C: 			bbranch \ [0x013] 0xfffffffa
+   110: 00016F: 		1 \ [0x0a6] 
+   111: 000170: 		b(>resolve) \ [0x0b2] 
+   112: 000171: 	1 \ [0x0a6] 
+   113: 000172: 	b(;) \ [0x0c2] 
+   114: 000173: external-token \ [0x0ca] test_begin_if_if_again 0x809
+   115: 00018D: b(:) \ [0x0b7] 
+   116: 00018E: 	b(<mark) \ [0x0b1] 
+   117: 00018F: 		b?branch \ [0x014] 0xa
+   118: 000192: 			b?branch \ [0x014] 0x6
+   119: 000195: 				bbranch \ [0x013] 0xfffffff9
+   120: 000198: 			b(>resolve) \ [0x0b2] 
+   121: 000199: 		b(>resolve) \ [0x0b2] 
+   122: 00019A: 	b(<mark) \ [0x0b1] 
+   123: 00019B: 		1 \ [0x0a6] 
+   124: 00019C: 		b?branch \ [0x014] 0xc
+   125: 00019F: 			1 \ [0x0a6] 
+   126: 0001A0: 			b?branch \ [0x014] 0x7
+   127: 0001A3: 				1 \ [0x0a6] 
+   128: 0001A4: 				bbranch \ [0x013] 0xfffffff6
+   129: 0001A7: 			b(>resolve) \ [0x0b2] 
+   130: 0001A8: 		b(>resolve) \ [0x0b2] 
+   131: 0001A9: 	b(;) \ [0x0c2] 
+   132: 0001AA: external-token \ [0x0ca] test_case_of_endof_endcase 0x80a
+   133: 0001C8: b(:) \ [0x0b7] 
+   134: 0001C9: 	b(case) \ [0x0c4] 
+   135: 0001CA: 		b(of) \ [0x01c] 0x5
+   136: 0001CD: 			b(endof) \ [0x0c6] 0x9
+   137: 0001D0: 		b(of) \ [0x01c] 0x5
+   138: 0001D3: 			b(endof) \ [0x0c6] 0x3
+   139: 0001D6: 		b(endcase) \ [0x0c5] 
+   140: 0001D7: 	b(case) \ [0x0c4] 
+   141: 0001D8: 		1 \ [0x0a6] 
+   142: 0001D9: 		b(of) \ [0x01c] 0x6
+   143: 0001DC: 			2 \ [0x0a7] 
+   144: 0001DD: 			b(endof) \ [0x0c6] 0x10
+   145: 0001E0: 		2 \ [0x0a7] 
+   146: 0001E1: 		b(of) \ [0x01c] 0x6
+   147: 0001E4: 			3 \ [0x0a8] 
+   148: 0001E5: 			b(endof) \ [0x0c6] 0x8
+   149: 0001E8: 		b(lit) \ [0x010] 0x4
+   150: 0001ED: 		b(endcase) \ [0x0c5] 
+   151: 0001EE: 	b(;) \ [0x0c2] 
+   152: 0001EF: end0 \ [0x000] 
+   153: 0001F0: \ detokenizing finished after 496 of 496 bytes.
+

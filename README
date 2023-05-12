@@ -1,0 +1,27 @@
+detok - Source code for detok command.
+Detokenizes fcode images and disassembles compiled PowerPC parts of Mac Open Firmware ROMs.
+
+toke - Source code for toke command.
+Converts Forth to an fcode image or a PCI expansion ROM fcode image.
+
+MPW - MPW tools and scripts. Read more in the Worksheet file.
+These are included only for historical purposes. They are not maintained.
+
+macOS - Tools and scripts updated for macOS (tested in Monterey).
+The worksheet shows how to compile detok and toke.
+
+Joe's Stuff - Source code files that do not exist in the original OpenBIOS source code.
+They are used to compile the MPW versions of detok and toke.
+
+Test - Scripts to do testing. Sample input files for the scripts. Output files produced by the scripts.
+
+Original source code for detok and toke is from http://www.openbios.info/bin/OpenBIOS-0.99.1.tar.bz2
+Many changes were made since then to add features or fix problems. See the ChangeLogs.
+Maybe some of the problems were fixed in later versions of the OpenBIOS code.
+
+detok and toke were updated for macOS. The changes probably broke MPW compatibility.
+detok now uses the capstone library for PowerPC disassembly of Mac Open Firmware ROMs.
+capstone has bugs (at least for PowerPC disassembly) for which detok has many workarounds
+which should now produce results at least as good as those produced using the disassembler
+library included in the CodeWarrior project. For macOS, capstone can be installed using
+Homebrew.
