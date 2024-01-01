@@ -309,7 +309,7 @@ static void new_token(void)
 bool good_tokenname(char* tokenname, u8 len)
 {
 	size_t pos;
-	return (pos=strspn(tokenname, "!\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")) && (tokenname[pos]==0) && (pos==len);
+	return (pos=strspn(tokenname, "!\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ{|}~")) && (tokenname[pos]==0) && (pos==len);
 }
 
 
