@@ -38,7 +38,7 @@ $_ = "";
 #ijklm
 if (/[\cl\ck]/) {
 	print STDERR "# File contains ctrl-l or ctrl-k characters.\n";
-	exit 1; # make sure our special escape character (ctrl-k) doesn't exist}
+	exit 1; # make sure our special escape characters (ctrl-l and ctrl-k) doesn't exist}
 }
 
 # figure out what the indent character is
