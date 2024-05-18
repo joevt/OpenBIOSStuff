@@ -352,9 +352,9 @@ void finish_headers(void)
 			printf("warning: rom size has been exceeded\n");
 		else
 		{
-			printf("Adding %d bytes of zero padding to ROM image.\n", padding);
+			printf("Adding %d bytes of 0xFF padding to ROM image.\n", padding);
 			while (padding--)
-				emit_byte(0);
+				emit_byte(0xff);
 		}
 	}
 }
