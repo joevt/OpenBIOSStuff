@@ -224,7 +224,7 @@ while true; do
 		if [[ ${PointerPCIDataStructure} != 001C ]] ; then
 			dump1=$((${RomStart} + 28))
 			varBytes="$(
-				xxd -p -r <<< "${romhex:(dump1)*2:$((0x${PointerPCIDataStructure} - 28))*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/'
+				xxd -p -r <<< "${romhex:(dump1)*2:$((0x${PointerPCIDataStructure} - 28))*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/' | perl -pE 's/^(\\ +\w+:)/uc $1/e'
 			)"
 		else
 			varBytes=""
@@ -233,7 +233,7 @@ while true; do
 		if (( 0x$PCIDataStructureLength != 0x0018 + (PCIDataStructureRevision == 3 ? 4 : 0) )) ; then
 			dump1=$((PCIStart + 0x0018 + (PCIDataStructureRevision == 3 ? 4 : 0)))
 			varBytes2="$(
-				xxd -p -r <<< "${romhex:(dump1)*2:(offset2 - dump1)*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/'
+				xxd -p -r <<< "${romhex:(dump1)*2:(offset2 - dump1)*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/' | perl -pE 's/^(\\ +\w+:)/uc $1/e'
 			)"
 		else
 			varBytes2=""
