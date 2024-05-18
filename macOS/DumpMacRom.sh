@@ -105,6 +105,7 @@ DumpMacRomDoErrors () {
 
 		{ grep -q 'Open Firmware, 0.992j' "${romFile}" && macrom=$((0x100)) ; } || \
 		{ grep -q 'Open Firmware, 1.0.5'  "${romFile}" && macrom=$((0x01)) ; } || \
+		{ grep -q 'Open Firmware, PipPCI' "${romFile}" && macrom=$((0x01)) ; } || \
 		{ grep -q 'Open Firmware, 2.0f1'  "${romFile}" && macrom=$((0x02)) ; } || \
 		{ grep -q 'Open Firmware 2.0a9'   "${romFile}" && macrom=$((0x02)) ; } || \
 		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}" && macrom=$((0x02)) ; } || \
