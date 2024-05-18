@@ -65,13 +65,17 @@ my $fcodep = "[0-9a-f]{3,4}"; # ${fcodep} # Power Mac Quad G5 allows 4 digit fco
 
 # pci header
 
-if ($pciHeaderFile ne "") {
+if ($pciHeaderFile eq "") {
+	# add a linefeed at the beginning
+	s/^/\n/;
+} else {
 	local $/=undef;
-	open FILE, $pciHeaderFile or die "Couldn't open file: $fcodeInput";
+	open FILE, $pciHeaderFile or die "Couldn't open file: $pciHeaderFile";
 	my $thePCIHeader = <FILE>;
 	close FILE;
 	substr($_, 0, 0, "$thePCIHeader");
-} timeit("pciheader");
+	timeit("pciheader");
+}
 
 # fcode-version2
 my $gotstart = 0;
@@ -402,6 +406,10 @@ s/(?<=\n)(?{$t=""})(?:    (?{$t.="\t"}))+/$t/g; timeit("convert indent spaces to
 
 s/[ \t]+$//mg; timeit("remove trailing spaces and tabs");
 
+if ($pciHeaderFile eq "") {
+	#remove linefeed at the beginning
+	s/^\n+//;
+}
 
 #===================================================
 
