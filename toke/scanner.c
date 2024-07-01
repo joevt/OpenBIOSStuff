@@ -1351,12 +1351,12 @@ void tokenize(void)
 		printf(FILE_POSITION "error: word '%s' is not in dictionary.\n",
 				iname, lineno, (char *)statbuf);
 
-		add_token(nextfcode, (char *)statbuf);
+		char* name=strdup((char *)statbuf);
+		add_token(nextfcode, name);
 
 		validate_to_target(0);
 		validate_instance(0);
 
-		emit_token("new-token");
 		emit_fcode(nextfcode);
 		nextfcode++;
 		gGotError = 1;
