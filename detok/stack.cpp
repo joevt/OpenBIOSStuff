@@ -65,9 +65,12 @@ void dpushtype(long type, long data)
 	printf("dpush: sp=%p, data=0x%lx, ",dstack, data);
 #endif
 	--dstack;
+	if (dstack<startdstack) {
+		stackerror(0);
+		dstack = startdstack;
+	}
 	dstack->type = type;
 	dstack->data = data;
-	if (dstack<startdstack) stackerror(0);
 }
 
 
@@ -101,6 +104,10 @@ long dpoptypes(long type1, long type2)
 	}
 
 	val=(dstack++)->data;
-	if (dstack>enddstack) stackerror(1);
+	if (dstack>enddstack) {
+		stackerror(1);
+		dstack = enddstack;
+		val = 0;
+	}
 	return val;
 }
