@@ -173,6 +173,7 @@ static long parse_number(u8 *start, u8 **endptr, int lbase)
 	long val = 0;
 	int negative = 0, curr;
 	u8 *nptr=start;
+	int got_digit = 0;
 
 	curr = *nptr;
 	if (curr == '-') {
@@ -195,16 +196,19 @@ static long parse_number(u8 *start, u8 **endptr, int lbase)
 		if (curr >= lbase)
 			break;
 
+		got_digit = 1;
 		val *= lbase;
 		val += curr;
 	}
 
 #if DEBUG_SCANNER
-	if (curr)
+	if (curr || !got_digit)
 		printf(FILE_POSITION "warning: couldn't parse number '%s' (%d/%d)\n",
 				iname, lineno, start,curr,lbase);
 #endif
 
+	if (!got_digit)
+		nptr = start;
 	if (endptr)
 		*endptr=nptr;
 
