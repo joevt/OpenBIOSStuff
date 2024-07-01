@@ -116,6 +116,7 @@ DumpMacRomDoErrors () {
 		{ grep -q 'Open Firmware, 2.4'    "${romFile}" && macrom=$((0x02)) ; } || \
 		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.2.8f1' "${romFile}" && macrom=$((0x20)) ; } || \
 		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.4.8f2' "${romFile}" && macrom=$((0x04)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.5.4f1' "${romFile}" && macrom=$((0x04)) ; } || \
 		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.6.0f1' "${romFile}" && macrom=$((0x04)) ; } || \
 		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.8.7f1' "${romFile}" && macrom=$((0x04)) ; } || \
 		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.8.9f4' "${romFile}" && macrom=$((0x04)) ; } || \
