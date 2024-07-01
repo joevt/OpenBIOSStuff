@@ -44,7 +44,7 @@ const char * current_token_name;
 
 int gPass;
 
-int indent, use_tabs=0, verbose=0, decode_all=0, ignore_len=0, mac_rom=0, linenumbers=0;
+int indent=0, use_tabs=0, verbose=0, decode_all=0, ignore_len=0, mac_rom=0, linenumbers=0;
 u32 romstartoffset = 0;
 
 bool offs16;
@@ -185,8 +185,13 @@ static void decode_indent(void)
 		int i;
 
 		if (indent<0) {
-			fprintf(stderr, "Line %d # Indentation error\n", linenum);
+			fprintf(stderr, "Line %d # Indentation negative error\n", linenum);
 			indent=0;
+		}
+
+		if (indent>1000) {
+			fprintf(stderr, "Line %d # Indentation too big error\n", linenum);
+			indent=1000;
 		}
 
 		if (use_tabs)
