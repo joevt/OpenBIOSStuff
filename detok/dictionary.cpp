@@ -926,6 +926,25 @@ void init_dictionary(void)
 		add_token( 0x461, "b<\">" );
 	}
 
+	else if (mac_rom & 0x400)
+	{
+/* Open Firmware 2.0.1; Power Book 3400 compiled fcode tokens, but not Kanga or Wallstreet */
+		add_token( 0x43E, "(val)" );
+		add_token( 0x43F, "(i-val)" );
+		add_token( 0x440, "b<to>" );
+		add_token( 0x441, "b<to>1" );
+		add_token( 0x442, "(i-to)" );
+		add_token( 0x443, "(var)" );
+		add_token( 0x444, "(i-var)" );
+		add_token( 0x448, "(defer)" );
+		add_token( 0x449, "(i-defer)" );
+		add_token( 0x44A, "(field)" );
+		add_token( 0x44B, "b<lit>" );
+		add_token( 0x44C, "b<'>" );
+		add_token( 0x44D, "{'}" );
+		add_token( 0x461, "b<\">" );
+	}
+
 	else if (mac_rom & 2)
 	{
 /* Open Firmware 2.0f1 and 2.4; Power Mac G3 ROM compiled fcode tokens */

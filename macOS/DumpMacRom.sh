@@ -108,6 +108,7 @@ DumpMacRomDoErrors () {
 		{ grep -q 'Open Firmware, PipPCI' "${romFile}" && macrom=$((0x01)) ; } || \
 		{ grep -q 'Open Firmware, 2.0f1'  "${romFile}" && macrom=$((0x02)) ; } || \
 		{ grep -q 'Open Firmware 2.0a9'   "${romFile}" && macrom=$((0x02)) ; } || \
+		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}" && grep -q -e '/cpus/PowerPC,603ev....cpu0' "${romFile}" && macrom=$((0x402)) ; } || \
 		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}" && macrom=$((0x02)) ; } || \
 		{ grep -q 'Open Firmware, 2.0.2'  "${romFile}" && macrom=$((0x200)) ; } || \
 		{ grep -q 'Open Firmware, 2.0.3'  "${romFile}" && macrom=$((0x200)) ; } || \

@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 			else
 			{
 				mac_rom=atoi( optarg );
-				if (mac_rom < 1 || mac_rom > 0x200)
+				if (mac_rom < 1 || mac_rom > 0x7ff)
 					goto badoption;
 			}
 			break;
