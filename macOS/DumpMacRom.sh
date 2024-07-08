@@ -171,8 +171,30 @@ DumpMacRomDoErrors () {
 	perl -nE 'if ( /^[0-9A-F :]+:\ \\\ detokenizing\ start/ .. /^[0-9A-F :]+:\ \\\ detokenizing\ finished/ ) { print $_; }
 	' < "${dstFile}" > "${dstFile3}"
 
-	diff -q "${dstFile}" "${dstFile2}" > /dev/null && rm "${dstFile2}"
+	missingwords="$(
+		perl -0777 -ne '
+			$what = "(val)"     ; if (!/ \(val\)\n *\w+: *\w+: 7E49 03A6 .*\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 8283 0000 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "(i-val)"   ; if (!/ \(i-val\)\n *\w+: *\w+: 7E49 03A6 .*\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 809D 0000 .*\n *\w+: *\w+: 8063 0000 .*\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E84 182E .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "b<to>"     ; if (!/ b<to>\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 3872 0004 .*\n *\w+: *\w+: 8092 0000 .*\n *\w+: *\w+: 7C69 03A6 .*\n *\w+: *\w+: 9284 000[08] .*\n *\w+: *\w+: 829F 0000 .*\n *\w+: *\w+: 3BFF 0004 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "b<to>1"    ; if (!/ b<to>1\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 8072 0000 .*\n *\w+: *\w+: 8092 FFFC .*\n *\w+: *\w+: 7C72 1A14 .*\n *\w+: *\w+: 9072 0000 .*\n *\w+: *\w+: 3804 FFD[08] .*\n *\w+: *\w+: 5004 01BA .*\n *\w+: *\w+: 9492 FFFC .*\n *\w+: *\w+: 7C00 906C .*\n( *\w+: *\w+: 7C00 04AC .*\n *\w+: *\w+: 4C00 012C .*\n)? *\w+: *\w+: 7C00 97AC .*\n *\w+: *\w+: 7C00 04AC .*\n *\w+: *\w+: 4C00 012C .*\n *\w+: *\w+: 4BFF FF\w\w .* b +b<to> .*\n/) { printf("    $what\n"); }
+			$what = "(i-to)"    ; if (!/ \(i-to\)\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 8072 0000 .*\n *\w+: *\w+: 809D 0000 .*\n *\w+: *\w+: 8063 000[08] .*\n *\w+: *\w+: 3812 0004 .*\n *\w+: *\w+: 7C09 03A6 .*\n *\w+: *\w+: 7E84 192E .*\n *\w+: *\w+: 829F 0000 .*\n *\w+: *\w+: 3BFF 0004 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "(var)"     ; if (!/ \(var\)\n *\w+: *\w+: 7E49 03A6 .*\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E88 02A6 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "(i-var)"   ; if (!/ \(i-var\)\n *\w+: *\w+: 7E49 03A6 .*\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 809D 0000 .*\n *\w+: *\w+: 8063 0000 .*\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E84 1A14 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "(defer)"   ; if (!/ \(defer\)\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 8003 0000 .*\n *\w+: *\w+: 7E48 03A6 .*\n *\w+: *\w+: 4BFF FF\w\w .* b +execute\+12 .*\n/) { printf("    $what\n"); }
+			$what = "(i-defer)" ; if (!/ \(i-defer\)\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 8063 0000 .*\n *\w+: *\w+: 809D 0000 .*\n *\w+: *\w+: 7E48 03A6 .*\n *\w+: *\w+: 7C04 182E .*\n *\w+: *\w+: 4BFF FF\w\w .* b +execute\+12 .*\n/) { printf("    $what\n"); }
+			$what = "(field)"   ; if (!/ \(field\)\n *\w+: *\w+: 7C68 02A6 .*\n *\w+: *\w+: 8003 0000 .*\n *\w+: *\w+: 7E49 03A6 .*\n *\w+: *\w+: 7E94 0214 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "b<lit>"    ; if (!/ b<lit>\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 3872 0004 .*\n *\w+: *\w+: 7C69 03A6 .*\n *\w+: *\w+: 8292 0000 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "b<'"'"'>"  ; if (!/ b<'"'"'>\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 3872 0004 .*\n *\w+: *\w+: 7C69 03A6 .*\n *\w+: *\w+: 8292 0000 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "{'"'"'}"   ; if (!/ \{'"'"'\}\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 8292 0000 .*\n *\w+: *\w+: 3812 0004 .*\n( *\w+: *\w+: 7C09 03A6 .*\n *\w+: *\w+: 5694 3032 .*\n *\w+: *\w+: 7E94 3670 .*\n| *\w+: *\w+: 5694 3032 .*\n *\w+: *\w+: 7C09 03A6 .*\n *\w+: *\w+: 7E94 3670 .*\n) *\w+: *\w+: 3800 0003 .*\n *\w+: *\w+: 7E94 0078 .*\n *\w+: *\w+: 7E94 9214 .*\n *\w+: *\w+: 4E80 0420 .*\n/) { printf("    $what\n"); }
+			$what = "b<\">"     ; if (!/ b<\">\n *\w+: *\w+: 7E48 02A6 .*\n *\w+: *\w+: 969F FFFC .*\n *\w+: *\w+: 8A92 0000 .*\n *\w+: *\w+: 3892 0001 .*\n *\w+: *\w+: 7CA4 A214 .*\n *\w+: *\w+: 38A5 0003 .*\n *\w+: *\w+: 54A5 003A .*\n *\w+: *\w+: 7CA8 03A6 .*\n *\w+: *\w+: 949F FFFC .*\n *\w+: *\w+: 4E80 0020 .*\n/) { printf("    $what\n"); }
+		' "$dstFile2"
+	)"
 
+	if [[ -n $missingwords ]]; then
+		printf "# Missing the following words:\n%s\n" "$missingwords"
+	fi
+
+	diff -q "${dstFile}" "${dstFile2}" > /dev/null && rm "${dstFile2}"
 
 	# Find bad errors by removing the benign ones
 
