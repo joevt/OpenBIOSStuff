@@ -262,7 +262,7 @@ csh handle = 0;
 
 bool cs_check(void) {
 	if (!handle) {
-		if (cs_open( CS_ARCH_PPC, (cs_mode)(CS_MODE_32 | CS_MODE_BIG_ENDIAN), &handle ) == CS_ERR_OK) {
+		if (cs_open( CS_ARCH_PPC, (cs_mode)(CS_MODE_32 | CS_MODE_64 | CS_MODE_BOOKE | CS_MODE_BIG_ENDIAN), &handle ) == CS_ERR_OK) {
 			cs_option(handle, CS_OPT_DETAIL, CS_OPT_ON);
 		}
 	}
@@ -594,7 +594,7 @@ static void dospr(u32 instruction, char *mnemonic, size_t sizemnemonic, char *op
 		case  284: nem = "tbl"    ; break;
 		case  285: nem = "tbu"    ; break;
 
-		case  287: reg = "PVR"    ; break; // User monitor mode control register
+		case  287: nem = "pvr"    ; break; // User monitor mode control register
 
 		case  304: reg = "HSPRG0" ; break; // Hypervisor SPRG
 		case  305: reg = "HSPRG1" ; break; // Hypervisor SPRG
@@ -886,35 +886,154 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 							cs_detail *detail = insn->detail;
 							cs_ppc *ppc = &detail->ppc;
 							cs_ppc_op *operands = ppc->operands;
-							
+
+/*
+	uint8_t bo; ///< BO field of branch condition. UINT8_MAX if invalid.
+	uint8_t bi; ///< BI field of branch condition. UINT8_MAX if invalid.
+	ppc_cr_bit crX_bit; ///< CR field bit to test.
+	ppc_reg crX;	    ///< The CR field accessed.
+	ppc_br_hint hint;   ///< The encoded hint.
+	ppc_pred pred_cr;   ///< CR-bit branch predicate
+	ppc_pred pred_ctr;  ///< CTR branch predicate
+	ppc_bh bh;	    ///< The BH field hint if any is present.
+*/
+
 							if (debugcapstone) {
 								int inc = 0;
-								inc += scnprintf( comment3+inc, comment3size-inc, " \\ nem:\"%s\" operands:\"%s\" id:%d=%s %s%scr0:%d groups:",
+								inc += scnprintf( comment3+inc, comment3size-inc, " \\ nem:\"%s\" operands:\"%s\" id:%d=%s",
 									insn->mnemonic,
 									insn->op_str,
 									insn->id,
-									cs_insn_name(handle, insn->id),
-
-									ppc->bc == PPC_BC_INVALID ? "" :
-									ppc->bc == PPC_BC_LT      ? "bc:LT " :
-									ppc->bc == PPC_BC_LE      ? "bc:LE " :
-									ppc->bc == PPC_BC_EQ      ? "bc:EQ " :
-									ppc->bc == PPC_BC_GE      ? "bc:GE " :
-									ppc->bc == PPC_BC_GT      ? "bc:GT " :
-									ppc->bc == PPC_BC_NE      ? "bc:NE " :
-									ppc->bc == PPC_BC_UN      ? "bc:UN " :
-									ppc->bc == PPC_BC_NU      ? "bc:NU " :
-									ppc->bc == PPC_BC_SO      ? "bc:SO " :
-									ppc->bc == PPC_BC_NS      ? "bc:NS " :
-									"bc:? ",
-
-									ppc->bh == PPC_BH_INVALID ? "" :
-									ppc->bh == PPC_BH_PLUS ? "bh:+ " :
-									ppc->bh == PPC_BH_MINUS ? "bh:- " :
-									"bh:? ",
-
-									ppc->update_cr0
+									cs_insn_name(handle, insn->id)
 								);
+								if (ppc->bc.bo != UINT8_MAX)
+									inc += scnprintf( comment3+inc, comment3size-inc, " bo:%d", (int)ppc->bc.bo );
+								if (ppc->bc.bi != UINT8_MAX)
+									inc += scnprintf( comment3+inc, comment3size-inc, " bi:%d", (int)ppc->bc.bi );
+								if (ppc->bc.crX_bit != UINT8_MAX)
+									inc += scnprintf( comment3+inc, comment3size-inc, " crX_bit:%s",
+										ppc->bc.crX_bit == PPC_BI_LT ? "LT" :
+										ppc->bc.crX_bit == PPC_BI_GT ? "GT" :
+										ppc->bc.crX_bit == PPC_BI_Z  ? "Z" :
+										ppc->bc.crX_bit == PPC_BI_SO ? "SO" : "unknown"
+									);
+								if (ppc->bc.crX)
+									inc += scnprintf( comment3+inc, comment3size-inc, " cr%d", (int)ppc->bc.crX - PPC_REG_CR0 );
+								if (ppc->bc.hint)
+									inc += scnprintf( comment3+inc, comment3size-inc, " br_hint:%s",
+										ppc->bc.hint == PPC_BR_RESERVED ? "RESERVED" :
+										ppc->bc.hint == PPC_BR_NOT_TAKEN ? "NOT_TAKEN-" :
+										ppc->bc.hint == PPC_BR_TAKEN  ? "TAKEN+" :
+										ppc->bc.hint == PPC_BR_HINT_MASK ? "HINT:MASK" : "unknown"
+									);
+								if (ppc->bc.pred_cr != PPC_PRED_INVALID)
+									inc += scnprintf( comment3+inc, comment3size-inc, " pred_cr:%s",
+										ppc->bc.pred_cr == PPC_PRED_LT			? "LT" :
+										ppc->bc.pred_cr == PPC_PRED_LE			? "LE" :
+										ppc->bc.pred_cr == PPC_PRED_EQ			? "EQ" :
+										ppc->bc.pred_cr == PPC_PRED_GE			? "GE" :
+										ppc->bc.pred_cr == PPC_PRED_GT			? "GT" :
+										ppc->bc.pred_cr == PPC_PRED_NE			? "NE" :
+										ppc->bc.pred_cr == PPC_PRED_UN			? "UN" :
+										ppc->bc.pred_cr == PPC_PRED_NU			? "NU" :
+										ppc->bc.pred_cr == PPC_PRED_SO			? "SO" :
+										ppc->bc.pred_cr == PPC_PRED_NS			? "NS" :
+										ppc->bc.pred_cr == PPC_PRED_NZ			? "NZ" :
+										ppc->bc.pred_cr == PPC_PRED_Z			? "Z" :
+										ppc->bc.pred_cr == PPC_PRED_LT_MINUS	? "LT_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_LE_MINUS	? "LE_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_EQ_MINUS	? "EQ_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_GE_MINUS	? "GE_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_GT_MINUS	? "GT_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_NE_MINUS	? "NE_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_UN_MINUS	? "UN_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_NU_MINUS	? "NU_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_NZ_MINUS	? "NZ_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_Z_MINUS		? "Z_MINUS" :
+										ppc->bc.pred_cr == PPC_PRED_LT_PLUS		? "LT_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_LE_PLUS		? "LE_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_EQ_PLUS		? "EQ_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_GE_PLUS		? "GE_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_GT_PLUS		? "GT_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_NE_PLUS		? "NE_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_UN_PLUS		? "UN_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_NU_PLUS		? "NU_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_NZ_PLUS		? "NZ_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_Z_PLUS		? "Z_PLUS" :
+										ppc->bc.pred_cr == PPC_PRED_LT_RESERVED	? "LT_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_LE_RESERVED	? "LE_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_EQ_RESERVED	? "EQ_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_GE_RESERVED	? "GE_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_GT_RESERVED	? "GT_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_NE_RESERVED	? "NE_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_UN_RESERVED	? "UN_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_NU_RESERVED	? "NU_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_NZ_RESERVED	? "NZ_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_Z_RESERVED	? "Z_RESERVED" :
+										ppc->bc.pred_cr == PPC_PRED_SPE			? "SPE" :
+										ppc->bc.pred_cr == PPC_PRED_BIT_SET		? "BIT_SET" :
+										ppc->bc.pred_cr == PPC_PRED_BIT_UNSET	? "BIT_UNSET" : "unknown"
+									);
+								if (ppc->bc.pred_ctr != PPC_PRED_INVALID)
+									inc += scnprintf( comment3+inc, comment3size-inc, " pred_ctr:%s",
+										ppc->bc.pred_ctr == PPC_PRED_LT				? "LT" :
+										ppc->bc.pred_ctr == PPC_PRED_LE				? "LE" :
+										ppc->bc.pred_ctr == PPC_PRED_EQ				? "EQ" :
+										ppc->bc.pred_ctr == PPC_PRED_GE				? "GE" :
+										ppc->bc.pred_ctr == PPC_PRED_GT				? "GT" :
+										ppc->bc.pred_ctr == PPC_PRED_NE				? "NE" :
+										ppc->bc.pred_ctr == PPC_PRED_UN				? "UN" :
+										ppc->bc.pred_ctr == PPC_PRED_NU				? "NU" :
+										ppc->bc.pred_ctr == PPC_PRED_SO				? "SO" :
+										ppc->bc.pred_ctr == PPC_PRED_NS				? "NS" :
+										ppc->bc.pred_ctr == PPC_PRED_NZ				? "NZ" :
+										ppc->bc.pred_ctr == PPC_PRED_Z				? "Z" :
+										ppc->bc.pred_ctr == PPC_PRED_LT_MINUS		? "LT_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_LE_MINUS		? "LE_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_EQ_MINUS		? "EQ_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_GE_MINUS		? "GE_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_GT_MINUS		? "GT_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NE_MINUS		? "NE_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_UN_MINUS		? "UN_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NU_MINUS		? "NU_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NZ_MINUS		? "NZ_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_Z_MINUS		? "Z_MINUS" :
+										ppc->bc.pred_ctr == PPC_PRED_LT_PLUS		? "LT_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_LE_PLUS		? "LE_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_EQ_PLUS		? "EQ_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_GE_PLUS		? "GE_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_GT_PLUS		? "GT_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NE_PLUS		? "NE_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_UN_PLUS		? "UN_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NU_PLUS		? "NU_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_NZ_PLUS		? "NZ_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_Z_PLUS			? "Z_PLUS" :
+										ppc->bc.pred_ctr == PPC_PRED_LT_RESERVED	? "LT_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_LE_RESERVED	? "LE_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_EQ_RESERVED	? "EQ_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_GE_RESERVED	? "GE_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_GT_RESERVED	? "GT_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_NE_RESERVED	? "NE_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_UN_RESERVED	? "UN_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_NU_RESERVED	? "NU_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_NZ_RESERVED	? "NZ_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_Z_RESERVED		? "Z_RESERVED" :
+										ppc->bc.pred_ctr == PPC_PRED_SPE			? "SPE" :
+										ppc->bc.pred_ctr == PPC_PRED_BIT_SET		? "BIT_SET" :
+										ppc->bc.pred_ctr == PPC_PRED_BIT_UNSET		? "BIT_UNSET" : "unknown"
+									);
+								if (ppc->bc.bh != PPC_BH_INVALID)
+									inc += scnprintf( comment3+inc, comment3size-inc, " bh:%s",
+										ppc->bc.bh == PPC_BH_SUBROUTINE_RET			? "SUBROUTINE_RET" :
+										ppc->bc.bh == PPC_BH_NO_SUBROUTINE_RET		? "NO_SUBROUTINE_RET" :
+										ppc->bc.bh == PPC_BH_NOT_PREDICTABLE		? "NOT_PREDICTABLE" :
+										ppc->bc.bh == PPC_BH_RESERVED				? "RESERVED" : "unknown"
+									);
+
+								if (ppc->update_cr0)
+									inc += scnprintf( comment3+inc, comment3size-inc, " update_cr0");
+
+								inc += scnprintf( comment3+inc, comment3size-inc, " groups:" );
 								for ( int i = 0; i < detail->groups_count; i++ ) {
 									inc += scnprintf( comment3+inc, comment3size-inc, "%s%d=%s", i?",":"",
 										detail->groups[i],
@@ -929,31 +1048,14 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 										case PPC_OP_INVALID: inc += scnprintf( comment3+inc, comment3size-inc, "invalid" ); break;
 										case PPC_OP_REG    : inc += scnprintf( comment3+inc, comment3size-inc, "%d=%s", ppc_op->reg, cs_reg_name( handle, ppc_op->reg ) ); break;
 										case PPC_OP_IMM    : inc += scnprintf( comment3+inc, comment3size-inc, "0x%llx", ppc_op->imm ); break;
-										case PPC_OP_MEM    : inc += scnprintf( comment3+inc, comment3size-inc, "0x%x(%d=%s)", ppc_op->mem.disp, ppc_op->mem.base, cs_reg_name( handle, ppc_op->mem.base ) ); break;
-										case PPC_OP_CRX    : inc += scnprintf( comment3+inc, comment3size-inc, "%d*(%d=%s)+%s",
-											ppc_op->crx.scale, 
-											ppc_op->crx.reg,
-											cs_reg_name( handle, ppc_op->crx.reg ),
-											ppc_op->crx.cond == PPC_BC_INVALID ? "" :
-											ppc_op->crx.cond == PPC_BC_LT      ? "lt" :
-											ppc_op->crx.cond == PPC_BC_LE      ? "le" :
-											ppc_op->crx.cond == PPC_BC_EQ      ? "eq" :
-											ppc_op->crx.cond == PPC_BC_GE      ? "ge" :
-											ppc_op->crx.cond == PPC_BC_GT      ? "gt" :
-											ppc_op->crx.cond == PPC_BC_NE      ? "ne" :
-											ppc_op->crx.cond == PPC_BC_UN      ? "un" :
-											ppc_op->crx.cond == PPC_BC_NU      ? "nu" :
-											ppc_op->crx.cond == PPC_BC_SO      ? "so" :
-											ppc_op->crx.cond == PPC_BC_NS      ? "ns" :
-											"?"
-										); break;
+										case PPC_OP_MEM    : inc += scnprintf( comment3+inc, comment3size-inc, "0x%x(%d=%s,%d=%s)", ppc_op->mem.disp, ppc_op->mem.base, cs_reg_name( handle, ppc_op->mem.base ), ppc_op->mem.offset, cs_reg_name( handle, ppc_op->mem.offset ) ); break;
 									}
 								}
 							} // if debugcapstone
-							
+
 							if (
-								insn->id == PPC_INS_MTDBATU || insn->id == PPC_INS_MTDBATL || insn->id == PPC_INS_MTIBATU || insn->id == PPC_INS_MTIBATL ||
-								insn->id == PPC_INS_MFDBATU || insn->id == PPC_INS_MFDBATL || insn->id == PPC_INS_MFIBATU || insn->id == PPC_INS_MFIBATL
+								insn->id == PPC_INS_ALIAS_MTDBATU || insn->id == PPC_INS_ALIAS_MTDBATL || insn->id == PPC_INS_ALIAS_MTIBATU || insn->id == PPC_INS_ALIAS_MTIBATL ||
+								insn->id == PPC_INS_ALIAS_MFDBATU || insn->id == PPC_INS_ALIAS_MFDBATL || insn->id == PPC_INS_ALIAS_MFIBATU || insn->id == PPC_INS_ALIAS_MFIBATL
 							) {
 								// 0,1,2,3, ... are not differentiated by fields of insn and detail so don't override
 								gotInstruction = TRUE;
@@ -964,45 +1066,53 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 								int out_op_count = 0;
 
 								// we need to parse branch instructions in case they point to a special token like (defer) which modifies the meaning of subsequent bytes
-								if ( ppc->bc != PPC_BC_INVALID  || // bcx
+								if (
+									insn->id == PPC_INS_BC      || // bx
+									insn->id == PPC_INS_BCA     || // bcx
+									insn->id == PPC_INS_BCCTR	||
+									insn->id == PPC_INS_BCCTRL	||
+									insn->id == PPC_INS_BCL		||
+									insn->id == PPC_INS_BCLA	||
+									insn->id == PPC_INS_BCLR	||
+									insn->id == PPC_INS_BCLRL	||
 
 									insn->id == PPC_INS_B       || // bx
 									insn->id == PPC_INS_BA      || // bx
 									insn->id == PPC_INS_BL      || // bx
 									insn->id == PPC_INS_BLA     || // bx
+/*
+									insn->id == PPC_INS_ALIAS_BDZ     || // bcx
+//									insn->id == PPC_INS_ALIAS_BDZA    || // bcx
+									insn->id == PPC_INS_ALIAS_BDZL    || // bcx
+									insn->id == PPC_INS_ALIAS_BDZLA   || // bcx
+
+									insn->id == PPC_INS_ALIAS_BDNZ    || // bcx
+//									insn->id == PPC_INS_ALIAS_BDNZA   || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZL   || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZLA  || // bcx
 
 
-									insn->id == PPC_INS_BDZ     || // bcx
-									insn->id == PPC_INS_BDZA    || // bcx
-									insn->id == PPC_INS_BDZL    || // bcx
-									insn->id == PPC_INS_BDZLA   || // bcx
+									insn->id == PPC_INS_ALIAS_BDZT    || // bcx
+									insn->id == PPC_INS_ALIAS_BDZTA   || // bcx
+									insn->id == PPC_INS_ALIAS_BDZTL   || // bcx
+									insn->id == PPC_INS_ALIAS_BDZTLA  || // bcx
 
-									insn->id == PPC_INS_BDNZ    || // bcx
-									insn->id == PPC_INS_BDNZA   || // bcx
-									insn->id == PPC_INS_BDNZL   || // bcx
-									insn->id == PPC_INS_BDNZLA  || // bcx
-
-
-									insn->id == PPC_INS_BDZT    || // bcx
-									insn->id == PPC_INS_BDZTA   || // bcx
-									insn->id == PPC_INS_BDZTL   || // bcx
-									insn->id == PPC_INS_BDZTLA  || // bcx
-
-									insn->id == PPC_INS_BDNZT   || // bcx
-									insn->id == PPC_INS_BDNZTA  || // bcx
-									insn->id == PPC_INS_BDNZTL  || // bcx
-									insn->id == PPC_INS_BDNZTLA || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZT   || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZTA  || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZTL  || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZTLA || // bcx
 
 									
-									insn->id == PPC_INS_BDZF    || // bcx
-									insn->id == PPC_INS_BDZFA   || // bcx
-									insn->id == PPC_INS_BDZFL   || // bcx
-									insn->id == PPC_INS_BDZFLA  || // bcx
+									insn->id == PPC_INS_ALIAS_BDZF    || // bcx
+									insn->id == PPC_INS_ALIAS_BDZFA   || // bcx
+									insn->id == PPC_INS_ALIAS_BDZFL   || // bcx
+									insn->id == PPC_INS_ALIAS_BDZFLA  || // bcx
 
-									insn->id == PPC_INS_BDNZF   || // bcx
-									insn->id == PPC_INS_BDNZFA  || // bcx
-									insn->id == PPC_INS_BDNZFL  || // bcx
-									insn->id == PPC_INS_BDNZFLA || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZF   || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZFA  || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZFL  || // bcx
+									insn->id == PPC_INS_ALIAS_BDNZFLA || // bcx
+*/
 									0
 								) {
 									bool bx     = (instruction & 0xfc000000) == 0x48000000; // bx (ba, bl, bla)
@@ -1010,7 +1120,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 									bool bcctrx = (instruction & 0xfc00fffe) == 0x4c000420; // bcctrx (bcctr, bcctrl)
 									bool bclrx  = (instruction & 0xfc00fffe) == 0x4c000020; // bclrx (bclr, bclrl)
 									bool LK     = (instruction & 1) != 0;
-									bool AA     = (instruction & 2) != 0; // can only be true for bx and bcx
+									bool AA     = (instruction & 2) != 0; // can only be true for bx and bcx; always false for bcctrx and bclrx
 									bool y      = 0;
 									bool checkCTR = 0;
 
@@ -1022,39 +1132,79 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 										int cr = BI >> 2;
 										int cond = BI & 3;
 										bool checkCR = !(BO & 0x10); // 0
-//										bool checkCRisT = (BO & 8);  // 1
-										checkCTR = !(BO & 4);   // 2
-//										bool checkCTRis0 = (BO & 2); // 3
+										bool checkCRisT = (BO & 8);  // 1
+										checkCTR = !(BO & 4);        // 2
+										bool checkCTRis0 = (BO & 2); // 3
 										y = (BO & 1);                // 4
+										bool croperand = false;
+										bool condasis = false;
 
-										if ( !checkCR && !checkCTR ) {
-											// For bcx, if not checking CR or CTR then it's ALWAYS
-											inc += scnprintf( operand+inc, operandsize-inc, "ALWAYS" );
-											b_op_count++;
-										}
-										
-										if (
-											( checkCR && !checkCTR && cr ) || // bcx with not cr0
-											(!checkCR && !checkCTR) || // bc ALWAYS
-											( checkCR && checkCTR ) // bdx with with condition check
-										) {
-											inc += scnprintf( operand+inc, operandsize-inc, "%scr%d", b_op_count ? "," : "", cr );
-											b_op_count++;
-
-											if (
-												(!checkCR && !checkCTR) || // bc ALWAYS
-												(checkCR && checkCTR) // bdx with with condition check
-											) {
-												// if checking CTR then it's probably a bdx mnemonic without conditional, so add condition.
-												inc += scnprintf( operand+inc, operandsize-inc, "_%s",
-													cond == 0 ? "LT" :
-													cond == 1 ? "GT" :
-													cond == 2 ? "EQ" :
-													cond == 3 ? "SO" : "??"
-												);
+										if (BO != 0b10100 || BI != 0) {
+											if ( !checkCR && !checkCTR ) {
+												if (checkCTRis0) {
+													inc += scnprintf( operand+inc, operandsize-inc, "0x%x", BO );
+													condasis = true;
+												} else {
+													// For bcx, if not checking CR or CTR then it's ALWAYS
+													inc += scnprintf( operand+inc, operandsize-inc, "ALWAYS" );
+												}
 												b_op_count++;
 											}
+
+											if (
+												( checkCR && !checkCTR && cr ) || // bcx with not cr0
+												(!checkCR && !checkCTR) || // bc ALWAYS
+												( checkCR && checkCTR ) // bdx with condition check
+											) {
+												inc += scnprintf( operand+inc, operandsize-inc, "%scr%d", b_op_count ? "," : "", cr );
+												b_op_count++;
+
+												if (
+													(!checkCR && !checkCTR) || // bc ALWAYS
+													(checkCR && checkCTR) // bdx with condition check
+												) {
+													// if checking CTR then it's probably a bdx mnemonic without conditional, so add condition.
+													inc += scnprintf( operand+inc, operandsize-inc, "_%s",
+														(condasis || checkCRisT) && cond == 0 ? "LT" :
+														(condasis || checkCRisT) && cond == 1 ? "GT" :
+														(condasis || checkCRisT) && cond == 2 ? "EQ" :
+														(condasis || checkCRisT) && cond == 3 ? "SO" :
+														!checkCRisT && cond == 0 ? "GE" :
+														!checkCRisT && cond == 1 ? "LE" :
+														!checkCRisT && cond == 2 ? "NE" :
+														!checkCRisT && cond == 3 ? "NS" :
+														"??"
+													);
+													croperand = true;
+													b_op_count++;
+												}
+											}
 										}
+
+										snprintf( mnemonic, sizeof(mnemonic), "b%s%s%s%s%s%s",
+											(checkCTR && checkCTRis0) ? "dz" : "",
+											(checkCTR && !checkCTRis0) ? "dnz" : "",
+
+											(!checkCTR && croperand) ? "c" :
+											(!checkCTR && checkCR && checkCRisT && cond == 0) ? "lt" :
+											(!checkCTR && checkCR && checkCRisT && cond == 1) ? "gt" :
+											(!checkCTR && checkCR && checkCRisT && cond == 2) ? "eq" :
+											(!checkCTR && checkCR && checkCRisT && cond == 3) ? "so" :
+											(!checkCTR && checkCR && !checkCRisT && cond == 0) ? "ge" :
+											(!checkCTR && checkCR && !checkCRisT && cond == 1) ? "le" :
+											(!checkCTR && checkCR && !checkCRisT && cond == 2) ? "ne" :
+											(!checkCTR && checkCR && !checkCRisT && cond == 3) ? "ns" :
+											(!checkCTR && checkCR) ? "??" : "",
+
+											bcx    ? "" :
+											bcctrx ? "ctr" :
+											bclrx  ? "lr" :
+											"??",
+
+											LK ? "l" : "",
+											AA ? "a" : ""
+										);
+
 									} // if bcx || bcctrx || bclrx
 
 									int BD = 0;
@@ -1179,10 +1329,11 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 									}
 									else {
 										// do each operand seperately
-										for ( int i = 0; i < ppc->op_count; i++  ) {
+										for ( int i = 0; i < ppc->op_count; i++ ) {
 									
 											cs_ppc_op *ppc_op;
-											if ( insn->id == PPC_INS_SUBF || insn->id == PPC_INS_SUBFC ) {
+
+											if ( strncmp(mnemonic, "subf", 4) == 0 && (insn->id == PPC_INS_SUBF || insn->id == PPC_INS_SUBFC) ) {
 												snprintf( mnemonic, sizeof(mnemonic), "sub%s%s",
 													insn->id == PPC_INS_SUBF ? "" : "c",
 													ppc->update_cr0 ? "." : ""
@@ -1240,42 +1391,65 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 													) {
 														// 7C00 0379 or. r0,r0,r0 \ id:406=or cr0:1 groups: ops:44=r0,44=r0,44=r0
 														// but other registers already are converted to mr
-														memcpy( mnemonic, "mr", 2 );
+														memcpy( mnemonic, "mr", 2 ); // use memcpy to keep the .
 													}
 													else if (
 														insn->id == PPC_INS_NOR && i == 2 && ppc->op_count == 3 &&
 														operands[1].type == PPC_OP_REG && operands[1].reg == ppc_op->reg
 													) {
 														// 7E94 A0F8 nor r20,r20,r20 \ id:405=nor cr0:0 groups: ops:64=r20,64=r20,64=r20
-														memcpy( mnemonic, "not", 3 );
+														memcpy( mnemonic, "not", 3 ); // use memcpy to keep the .
 													}
 													else if (
 														insn->id == PPC_INS_CRAND  ||
 														insn->id == PPC_INS_CRANDC ||
 														insn->id == PPC_INS_CREQV  ||
-														insn->id == PPC_INS_CRSET  ||
+														insn->id == PPC_INS_ALIAS_CRSET  ||
 														insn->id == PPC_INS_CRNAND ||
 														insn->id == PPC_INS_CRNOR  ||
-														insn->id == PPC_INS_CRNOT  ||
+														insn->id == PPC_INS_ALIAS_CRNOT  ||
 														insn->id == PPC_INS_CROR   ||
-														insn->id == PPC_INS_CRMOVE ||
+														insn->id == PPC_INS_ALIAS_CRMOVE ||
 														insn->id == PPC_INS_CRORC  ||
 														insn->id == PPC_INS_CRXOR  ||
-														insn->id == PPC_INS_CRCLR  ||
+														insn->id == PPC_INS_ALIAS_CRCLR  ||
 														0
 													) {
-														// capstone doesn't distinguish condition register bits
-														// 4C40 2342 crorc 2,0,4 \ id:60=crorc cr0:0 groups: ops:46=r2,44=r0,48=r4
-														int val = ppc_op->reg - PPC_REG_R0;
-														int cr = val >> 2;
-														int cond = val & 3;
-														snprintf( oneop, sizeof(oneop), "cr%d_%s",
-															cr,
-															cond == 0 ? "LT" :
-															cond == 1 ? "GT" :
-															cond == 2 ? "EQ" :
-															cond == 3 ? "SO" : "??"
-														);
+														int cr;
+														int cond;
+														int val;
+														if ( ppc_op->reg >= PPC_REG_CR0EQ ) {
+															val = ppc_op->reg - PPC_REG_CR0EQ;
+															cr = val & 7;
+															cond = val >> 3;
+															snprintf( oneop, sizeof(oneop), "cr%d_%s",
+																cr,
+																cond == 0 ? "EQ" :
+																cond == 1 ? "GT" :
+																cond == 2 ? "LT" :
+																cond == 3 ? "SO" : "??"
+															);
+														} else {
+															// old capstone doesn't distinguish condition register bits
+															// 4C40 2342 crorc 2,0,4 \ id:60=crorc cr0:0 groups: ops:46=r2,44=r0,48=r4
+															val = ppc_op->reg - PPC_REG_R0;
+															cr = val >> 2;
+															cond = val & 3;
+															snprintf( oneop, sizeof(oneop), "cr%d_%s",
+																cr,
+																cond == 0 ? "LT" :
+																cond == 1 ? "GT" :
+																cond == 2 ? "EQ" :
+																cond == 3 ? "SO" : "??"
+															);
+														}
+													}
+													else if (
+														insn->id == PPC_INS_RLWINM &&
+														i == 1 &&
+														(strncmp(mnemonic, "slwi", 4) == 0 || strncmp(mnemonic, "srwi", 4) == 0)
+													) {
+														snprintf( oneop, sizeof(oneop), "r%d", (instruction >> 21) & 31 );
 													}
 													else {
 														snprintf( oneop, sizeof(oneop), "%s", cs_reg_name( handle, ppc_op->reg ) );
@@ -1288,27 +1462,27 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 													int64_t imm = ppc_op->imm;
 											
 													if (
-														insn->id == PPC_INS_LI     ||
+														insn->id == PPC_INS_ALIAS_LI     ||
 														insn->id == PPC_INS_CMPWI  ||
 														insn->id == PPC_INS_CMPDI  ||
 														insn->id == PPC_INS_MULLI  ||
-														insn->id == PPC_INS_TWGTI  ||
+														insn->id == PPC_INS_ALIAS_TWGTI  ||
 														insn->id == PPC_INS_SUBFIC ||
 														( i == 1 && (
-															insn->id == PPC_INS_TWLTI  ||
-															insn->id == PPC_INS_TWEQI  ||
-															insn->id == PPC_INS_TWGTI  ||
-															insn->id == PPC_INS_TWNEI  ||
-															insn->id == PPC_INS_TWLLTI ||
-															insn->id == PPC_INS_TWLGTI ||
-															insn->id == PPC_INS_TWUI   ||
-															insn->id == PPC_INS_TDLTI  ||
-															insn->id == PPC_INS_TDEQI  ||
-															insn->id == PPC_INS_TDGTI  ||
-															insn->id == PPC_INS_TDNEI  ||
-															insn->id == PPC_INS_TDLLTI ||
-															insn->id == PPC_INS_TDLGTI ||
-															insn->id == PPC_INS_TDUI
+															insn->id == PPC_INS_ALIAS_TWLTI  ||
+															insn->id == PPC_INS_ALIAS_TWEQI  ||
+															insn->id == PPC_INS_ALIAS_TWGTI  ||
+															insn->id == PPC_INS_ALIAS_TWNEI  ||
+															insn->id == PPC_INS_ALIAS_TWLLTI ||
+															insn->id == PPC_INS_ALIAS_TWLGTI ||
+															insn->id == PPC_INS_ALIAS_TWUI   ||
+															insn->id == PPC_INS_ALIAS_TDLTI  ||
+															insn->id == PPC_INS_ALIAS_TDEQI  ||
+															insn->id == PPC_INS_ALIAS_TDGTI  ||
+															insn->id == PPC_INS_ALIAS_TDNEI  ||
+															insn->id == PPC_INS_ALIAS_TDLLTI ||
+															insn->id == PPC_INS_ALIAS_TDLGTI ||
+															insn->id == PPC_INS_ALIAS_TDUI
 														) ) ||
 														( i == 2 && (
 															insn->id == PPC_INS_TWI    ||
@@ -1320,7 +1494,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 													}
 
 													else if (
-														insn->id == PPC_INS_LIS   ||
+														insn->id == PPC_INS_ALIAS_LIS   ||
 														insn->id == PPC_INS_ORIS  ||
 														insn->id == PPC_INS_ANDIS ||
 														insn->id == PPC_INS_XORIS ||
@@ -1335,7 +1509,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 													}
 
 													else if (
-														insn->id == PPC_INS_ROTLWI && imm > 16
+														insn->id == PPC_INS_ALIAS_ROTLWI && imm > 16
 													) {
 														snprintf( oneop, sizeof(oneop), "%lld", 32 - imm );
 														mnemonic[3] = 'r';
@@ -1354,10 +1528,10 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 														insn->id == PPC_INS_RLWNM   ||
 														insn->id == PPC_INS_RLDCL   ||
 														insn->id == PPC_INS_RLDCR   ||
-														insn->id == PPC_INS_CLRLWI  ||
-														insn->id == PPC_INS_CLRLDI  ||
-														insn->id == PPC_INS_ROTLDI  ||
-														insn->id == PPC_INS_ROTLWI  ||
+														insn->id == PPC_INS_ALIAS_CLRLWI  ||
+														insn->id == PPC_INS_ALIAS_CLRLDI  ||
+														insn->id == PPC_INS_ALIAS_ROTLDI  ||
+														insn->id == PPC_INS_ALIAS_ROTLWI  ||
 														insn->id == PPC_INS_VSLDOI  ||
 														insn->id == PPC_INS_VCFSX   ||
 														insn->id == PPC_INS_VCFUX   ||
@@ -1381,13 +1555,23 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 														// 7C00 04AC sync 0 \ id:606=sync cr0:0 groups: ops:0x0
 													}
 
-													else if ( (
+													else if ( i == 2 && (
 														insn->id == PPC_INS_ADDI  ||
 														insn->id == PPC_INS_ADDIC ||
 														insn->id == PPC_INS_ADDIS
 													) && imm & 0x8000 ) {
-														memcpy( mnemonic, "sub", 3 );
+														// adding a negative value is a subtract
+														// "li" is PPC_INS_ADDI with two operands, so check i == 2 to make sure this is a three operand add instruciton
+														memcpy( mnemonic, "sub", 3 ); // use memcpy to copy the i, ic, or is and .
 														imm = -(int16_t)imm;
+														goto doimm;
+													}
+
+													else if (
+														insn->id == PPC_INS_ADDIS
+													) {
+														// shifted operands are easier to understand if unsigned
+														imm = (uint16_t)imm;
 														goto doimm;
 													}
 
@@ -1773,12 +1957,23 @@ doimm:
 												break;
 												
 												case PPC_OP_MEM:
-													if ( ppc_op->mem.base == PPC_REG_R0 )
+													if ( ppc_op->mem.base == PPC_REG_R0 && ppc_op->mem.offset == PPC_REG_INVALID )
 														snprintf( oneop, sizeof(oneop), "%d(0)", ppc_op->mem.disp );
-													else
+													else if ( ppc_op->mem.base == PPC_REG_ZERO && ppc_op->mem.disp == 0 ) {
+														if (ppc_op->mem.offset == PPC_REG_INVALID)
+															snprintf( oneop, sizeof(oneop), "0(0)");
+														else
+															snprintf( oneop, sizeof(oneop), "0,%s", cs_reg_name( handle, ppc_op->mem.offset ) );
+													}
+													else if ( ppc_op->mem.offset == PPC_REG_INVALID )
 														snprintf( oneop, sizeof(oneop), "%d(%s)", ppc_op->mem.disp, cs_reg_name( handle, ppc_op->mem.base ) );
+													else if ( ppc_op->mem.disp == 0 )
+														snprintf( oneop, sizeof(oneop), "%s,%s", cs_reg_name( handle, ppc_op->mem.base ), cs_reg_name( handle, ppc_op->mem.offset ) );
+													else
+														snprintf( oneop, sizeof(oneop), "%s,%s+%d", cs_reg_name( handle, ppc_op->mem.base ), cs_reg_name( handle, ppc_op->mem.offset ), ppc_op->mem.disp );
 													break;
 
+/*
 												case PPC_OP_CRX:
 													snprintf( oneop, sizeof(oneop), "%s_%s",
 														// ppc_op->crx.scale,
@@ -1797,6 +1992,7 @@ doimm:
 														"?"
 													);
 													break;
+*/
 
 												default:
 													fprintf( stderr, "Line %d # Assembly instruction has invalid operand\n", linenum + 1 );
