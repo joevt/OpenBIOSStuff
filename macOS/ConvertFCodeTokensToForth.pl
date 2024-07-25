@@ -300,7 +300,7 @@ s/(?<=\n)(${indentsnotgreedy})${indent}l?bbranch ((?:\\ \[(?:0x013|0x3ff)\] )?)(
                   s/(?<=\n)(${indents})l?bbranch ((?:\\ \[(?:0x013|0x3ff)\] )?)(0x[\da-f]{1,4})\n${indents}b\(>resolve\) /$1else \\ ($3) $2/mg && do { print STDERR "Got bad Else.\n" }; timeit("else");
 s/(?<=\n)(${indents})l?bbranch ((?:\\ \[(?:0x013|0x3ff)\] )?)0x(?:ffffffff)?(?:ffff)?([89a-f][\da-f]{3})\b/$1again \\ (0x$3) $2/mg || do { $missing .= "\nagain" }; timeit("again");
 s/(?<=\n)(${indents})b\(>resolve\) /$1then /mg || do { $missing .= "\nthen" }; timeit("then");
-s/(?<=\n)(${indents})l?b\?branch ((?:\\ \[(?:0x014|0x3fe)\] )?)(0x[\da-f]{1,4})/$1if \\ ($3) $2/mg || do { $missing .= "\nif" }; timeit("if");
+s/(?<=\n)(${indents})l?b\?branch ((?:\\ \[(?:0x014|0x3fe)\] )?)(0x[\da-f]+)/$1if \\ ($3) $2/mg || do { $missing .= "\nif" }; timeit("if");
 
 my $repeats = 0;
 #         1           2                                                         3                                      4     5                                             

@@ -258,9 +258,9 @@ void output_token(void)
 }
 
 
-static s16 decode_offset(bool islong)
+static s32 decode_offset(bool islong)
 {
-	s16 offs;
+	s32 offs;
 
 	u32 offsetaddr = (u32)get_streampos();
 
@@ -278,7 +278,10 @@ static s16 decode_offset(bool islong)
 	if ( gPass )
 	{
 		output_token();
-		printf("0x%x\n",offs);
+		if (islong && offs > 0x7fff)
+			printf("0x0%x\n",offs);
+		else
+			printf("0x%x\n",offs);
 	}
 	return offs;
 }
@@ -424,7 +427,7 @@ vtoken_t *add_virtual_token(u16 number, u32 pos) {
 static void decode_branch(bool islong)
 {
 	u32 offsetaddr = (u32)get_streampos();
-	s16 offs = decode_offset(islong);
+	s32 offs = decode_offset(islong);
 	if (offs>=0) {
 		indent++;
 		if (islong && !gPass) add_virtual_token(0x0b2, offs + offsetaddr); // b(>resolve)
@@ -433,6 +436,7 @@ static void decode_branch(bool islong)
 		indent--;
 		if (islong && !gPass) {
 			add_virtual_token(0x0b1, offs + offsetaddr); // b(<mark)
+			// Actually, the following can't be true since long branch doesn't support negative offsets!
 			fprintf(stderr, "Line %d # long branch with negative offset means line numbers are not accurate for first pass.\n", linenum);
 			linenum++;
 		}

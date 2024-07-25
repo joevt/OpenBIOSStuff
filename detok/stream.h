@@ -40,7 +40,7 @@ u16 get_token(void);
 u8  get_num8(void);
 u16 get_num16(void);
 u32 get_num32(void);
-s16 get_offset(bool islong);
+s32 get_offset(bool islong);
 char *get_string(u8 * len);
 char *get_string2(u8 * len, bool* isGoodString);
 

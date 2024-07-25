@@ -168,9 +168,11 @@ u8 get_num8(void)
 	return(inbyte);
 }
 
-s16 get_offset(bool islong)
+s32 get_offset(bool islong)
 {
-	if (islong || offs16)
+	if (islong)
+		return ((u16)get_num16());
+	else if (offs16)
 		return ((s16)get_num16());
 	else
 		return ((s8)get_num8());
