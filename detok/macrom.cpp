@@ -2731,7 +2731,7 @@ void decode_rom_token3(void)
 	if (thepos >= 8)
 	if ( ( thepos & 3 ) == 0 )
 	if (gLastFcodeImageEndPos)
-	if ((thepos - gLastFcodeImageEndPos) <= 32)
+	if ((thepos - gLastFcodeImageEndPos) <= 88)
 	if ((thepos - gLastFcodeImageEndPos) >= 16)
 	{
 		set_streampos( thepos - 8 );
