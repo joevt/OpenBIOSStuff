@@ -97,7 +97,8 @@ void set_streampos(u32 pos)
 static int get_byte(void)
 {
 	if (pc>=max) {
-		printf ("\nUnexpected end of file.\n");
+		if ( gPass )
+			printf ("\n\\ Unexpected end of file.\n");
 		inbyte=0;
 		return 0;
 	}
