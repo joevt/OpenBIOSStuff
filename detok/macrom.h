@@ -8,6 +8,7 @@ void disassemble_lines(u32 endPos, u32 currentPos);
 void mark_last_streampos(void);
 void code_s(void);
 void decode_rom_token(void);
+void decode_rom_token1122(void);
 void decode_rom_token2(void);
 void decode_rom_token203(void);
 void decode_rom_token3(void);

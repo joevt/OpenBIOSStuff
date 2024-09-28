@@ -689,7 +689,7 @@ static void decode_token(u16 token_to_decode)
 
 	*/
 					case 0x401:
-						if (mac_rom & 0x101)
+						if (mac_rom & 0x901)
 							local_variables_declaration();
 						else
 							goto thedefault;
@@ -730,11 +730,15 @@ thedefault:
 						}
 						break;
 					case 0x000:
+						if (mac_rom & 0x800) {
+							// for doing bytes between rom images of Open Firmware 1.1.22
+							decode_rom_token1122();
+						}
 						if ( mac_rom & 0x200 ) {
 							// for doing bytes between rom images of Open Firmware 2.0.3
 							decode_rom_token203();
 						}
-						if ( mac_rom & ~0x303 ) {
+						if ( mac_rom & 0x4FC ) {
 							// for doing bytes between rom images in Open Firmware 2.0.3 and Open Firmware 3 and later
 							decode_rom_token3();
 						}

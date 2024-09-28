@@ -2877,6 +2877,28 @@ static void got_special_start(void) {
 }
 
 
+void decode_rom_token1122(void)
+{
+	u32 thepos = current_token_pos + 1;
+	if (thepos >= 8)
+	if ( ( thepos & 3 ) == 0 )
+	if (thepos - gLastPos <= 32)
+	{
+		set_streampos( thepos - 16 );
+		u32 num1 = get_num32(); // -16
+		u32 num2 = get_num32(); // -12
+		u32 num3 = get_num32(); // -8
+		u32 num4 = get_num32(); // -4
+		u32 num5 = get_num32(); // 0
+		set_streampos( thepos );
+		if ( (num1 & 0xff000003) == 0xff000000 && num2 == 0xffffffff && num3 > 0 && num3 < 10 && num4 == 0 && (num5 & 0xff000000) != 0 && num5 != 0xffffffff )
+		{
+			got_special_start();
+		}
+	}
+}
+
+
 void decode_rom_token2(void)
 {
 	u32 thepos = current_token_pos + 1;

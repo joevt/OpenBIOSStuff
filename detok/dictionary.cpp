@@ -814,7 +814,7 @@ void init_dictionary(void)
 	{
 /* tokens used by all Power Macs */
 
-		if (mac_rom & 0x101) {
+		if (mac_rom & 0x901) {
 			// Open Firmware 1.0.5
 			make_of_token( add_token( 0x401, "b(pushlocals)" ), "" ); /* local variables { local_0 ... local_n-1 ; ... } */
 		}
@@ -869,7 +869,7 @@ void init_dictionary(void)
 		add_token( 0x44F, "b<\">" );
 	}
 
-	if (mac_rom & 1)
+	if ((mac_rom & 0x801) == 1)
 	{
 /* Open Firmware 1.0.5; Power Mac 7500, 9500, 8600, etc. compiled fcode tokens */
 		add_token( 0x432, "(val)" );
