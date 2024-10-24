@@ -60,7 +60,7 @@ if (/(?<=\n)[\t]/m) {
 
 my $indents = "[$indentChar]*+"; # ${indents}
 my $indentsnotgreedy = "[$indentChar]*"; # ${indentsnotgreedy}
-my $number = "-?\\d[0-9a-f]*|\\/[cwl]|false|true|d#\\d+|h#[\\da-f]+"; # ${number}
+my $number = "-?\\d[0-9a-f]*|\\/\\w+|false|true|d#\\d+|h#[\\da-f]+"; # ${number}
 my $fcodep = "[0-9a-f]{3,4}"; # ${fcodep} # Power Mac Quad G5 allows 4 digit fcodes
 
 # pci header
@@ -192,7 +192,7 @@ foreach my $theword (@words) {
       s/(?<=\n)${indents}instance ((?:\\ \[0x0c0] )?)\n(\ck[^\ck\n]+\ck${indents}(?:(?:${number}) )?)([^\ck\n]+)/${2}instance $3$1/mg || do { $missing .= "\ninstance" }; timeit("move instance to between num and forth word");
 s/(?<=\n)${indents}vectored ((?:\\ \[0x${fcodep}] )?)\n(\ck[^\ck\n]+\ck${indents}(?:(?:${number}) )?)([^\ck\n]+)/${2}vectored $3$1/mg || do { $missing .= "\nvectored" }; timeit("move vectored to between num and forth word");
 s/(?<=\n)(\ck[^\ck\n]+\ck(${indents})(?:instance |vectored )?: )/$2\n$1/mg || do { $missing .= "\n:" }; timeit("place a carriage return before :");
-s/(?<=\n)(${indents})0 ((?:\\ \[0x${fcodep}\] )*)\n(\ck[^\ck\n]+\ck)(${indents}(?:[\da-f]+|\/[cwl]) field )/$3$1struct $2\n$4/mg || do { $missing .= "\nstruct" }; timeit("replace 0 with struct if it is located before a field instruction");
+s/(?<=\n)(${indents})0 ((?:\\ \[0x${fcodep}\] )*)\n(\ck[^\ck\n]+\ck)(${indents}(?:[\da-f]+|\/\w+) field )/$3$1struct $2\n$4/mg || do { $missing .= "\nstruct" }; timeit("replace 0 with struct if it is located before a field instruction");
 
 my $lastToken = "";
 my $replacement = "";
