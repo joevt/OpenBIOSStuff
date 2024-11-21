@@ -8,24 +8,24 @@ if (( 0 )); then
 #	# Run Terminal.app and set the terminal width to 130 and make sure the unlimited buffer option is selected in the window preferences.
 #	# On the other computer, enter Open Firmware and type: " enet:telnet,192.168.1.150" io
 #	# Then in the terminal type the following:
-#	
+#
 #	telnet
 #	open 192.168.1.150
-#	
+#
 #	: dumpbytes
 #	cr bounds ?do i 3f and 0= if cr then i c@ 2 u.r loop cr ;
-#	
-#	
+#
+#
 #	# The first word in the dictionary is the last one listed when using the words command.
 #	# Use ' to get the address of the word.
-#	
-#	0 > ' <init-world> . ff845730  ok			
-#	
+#
+#	0 > ' <init-world> . ff845730  ok
+#
 #	# Use dump to find memory before the first word that may contain stuff that you want to include in the disassembly
-#	
+#
 #	# Then dump everything from that address to the end of the dictionary (which is given by the word "here")
 #	0 > ff844b00 here ff844b00 - dumpbytes
-#	
+#
 #	# If your Mac has a serial port then that can be used instead of telnet. Use the patch described in "Serial Port OF Mods"
 #	# to set the serial port's speed to 230400 bps before starting.
 fi
@@ -78,7 +78,7 @@ TempFolder="$(mktemp -d /tmp/DumpMacRom.XXXXXX)"
 DumpMacRomDoErrors () {
 	theError="${1}"
 	tmpErrors="${TempFolder}/tmpErrors.txt"
-	
+
 	sed -E "/${theError}/ { w ${tmpErrors}
 		d ; }" remainingErrors.txt > remainingErrors2.txt
 	echo $(wc -l "${tmpErrors}") "${theError}" >> errorCounts.txt
@@ -160,7 +160,7 @@ DumpMacRomDoErrors () {
 		}
 
 	fi
-	
+
 	printf "# macrom = 0x%x\n" "${macrom}"
 
 	#echo "# " detok -t -v -a -n -o -i -m '"'"${macrom}"'"' -s '"'"${romStartOffset}"'"' '"'"${romFile}"'"' " 2> " '"'"${TempFolder}/errors.txt"'"' " > " '"'"${TempFolder}/All0.txt"'"'
@@ -331,7 +331,7 @@ DumpMacRomDoErrors () {
 	if (( ${numErrors} == 0 )); then
 		rm remainingErrors.txt
 	fi
-	
+
 	sort -Vr errorCounts.txt -o errorCountsSorted.txt
 	# bbdiff errors.txt errors2.txt
 
