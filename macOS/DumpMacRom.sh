@@ -131,29 +131,30 @@ DumpMacRomDoErrors () {
 
 	if [[ -z $macrom ]]; then
 
-		{ grep -q 'Open Firmware, 0.992j' "${romFile}"                                   && macrom=$((0x100)) ; } || \
-		{ grep -q 'Open Firmware, 1.0.5'  "${romFile}"                                   && macrom=$((0x001)) ; } || \
-		{ grep -q 'OpenFirmware1.1.22'    "${romFile}"                                   && macrom=$((0x801)) ; } || \
-		{ grep -q 'Open Firmware, PipPCI' "${romFile}"                                   && macrom=$((0x001)) ; } || \
-		{ grep -q 'Open Firmware, 2.0f1'  "${romFile}"                                   && macrom=$((0x002)) ; } || \
-		{ grep -q 'Open Firmware 2.0a9'   "${romFile}"                                   && macrom=$((0x002)) ; } || \
-		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}" \
-		                        && grep -q -e '/cpus/PowerPC,603ev....cpu0' "${romFile}" && macrom=$((0x402)) ; } || \
-		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}"                                   && macrom=$((0x002)) ; } || \
-		{ grep -q 'Open Firmware, 2.0.2'  "${romFile}"                                   && macrom=$((0x200)) ; } || \
-		{ grep -q 'Open Firmware, 2.0.3'  "${romFile}"                                   && macrom=$((0x200)) ; } || \
-		{ grep -q 'Open Firmware, 2.0'    "${romFile}"                                   && macrom=$((0x012)) ; } || \
-		{ grep -q 'Open Firmware 2.3'     "${romFile}"                                   && macrom=$((0x002)) ; } || \
-		{ grep -q 'Open Firmware, 2.4'    "${romFile}"                                   && macrom=$((0x002)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.2.8f1' "${romFile}" && macrom=$((0x020)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.4.8f2' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.5.4f1' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.6.0f1' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.8.7f1' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.8.9f4' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '4.9.5f3' "${romFile}" && macrom=$((0x004)) ; } || \
-		{ grep -q 'OpenFirmware 3'        "${romFile}"                                   && macrom=$((0x008)) ; } || \
-		{ grep -q 'OpenFirmware 4'        "${romFile}"                                   && macrom=$((0x004)) ; } || \
+		{ grep -q 'Open Firmware, 0.992j' "${romFile}"                                    && macrom=$((0x100)) ; } || \
+		{ grep -q 'Open Firmware, 1.0.5'  "${romFile}"                                    && macrom=$((0x001)) ; } || \
+		{ grep -q 'OpenFirmware1.1.22'    "${romFile}"                                    && macrom=$((0x801)) ; } || \
+		{ grep -q 'Open Firmware, PipPCI' "${romFile}"                                    && macrom=$((0x001)) ; } || \
+		{ grep -q 'Open Firmware, 2.0f1'  "${romFile}"                                    && macrom=$((0x002)) ; } || \
+		{ grep -q 'Open Firmware 2.0a9'   "${romFile}"                                    && macrom=$((0x002)) ; } || \
+		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}"                                                                \
+		                        && grep -q -e '/cpus/PowerPC,603ev....cpu0' "${romFile}"  && macrom=$((0x402)) ; } || \
+		{ grep -q 'Open Firmware, 2.0.1'  "${romFile}"                                    && macrom=$((0x002)) ; } || \
+		{ grep -q 'Open Firmware, 2.0.2'  "${romFile}"                                    && macrom=$((0x200)) ; } || \
+		{ grep -q 'Open Firmware, 2.0.3'  "${romFile}"                                    && macrom=$((0x200)) ; } || \
+		{ grep -q 'Open Firmware, 2.0'    "${romFile}"                                    && macrom=$((0x012)) ; } || \
+		{ grep -q 'Open Firmware 2.3'     "${romFile}"                                    && macrom=$((0x002)) ; } || \
+		{ grep -q 'Open Firmware, 2.4'    "${romFile}"                                    && macrom=$((0x002)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '10/11/01' "${romFile}" && macrom=$((0x020)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '11/20/01' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '09/30/02' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '11/11/02' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '02/20/03' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '09/23/04' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '03/23/05' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}" && grep -q '09/22/05' "${romFile}" && macrom=$((0x004)) ; } || \
+		{ grep -q 'OpenFirmware 3'        "${romFile}"                                    && macrom=$((0x008)) ; } || \
+		{ grep -q 'OpenFirmware 4'        "${romFile}"                                    && macrom=$((0x004)) ; } || \
 		{
 			echo "# unknown Open Firmware version"
 			macrom=$((0x04))
