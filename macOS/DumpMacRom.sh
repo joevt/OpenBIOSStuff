@@ -368,8 +368,8 @@ DumpMacRomDoErrors () {
 	if (( $(stat -f %z "${TempFolder}/Part2.txt") == 0 )); then
 		rm "${TempFolder}/Part2.txt"
 	else
-		#echo ConvertFCodeTokensToForth.pl '"'"${TempFolder}/Part2.txt"'"' '""' ">" '"'"${dstFile4}"'"' "2>" '"'"errors3.txt"'"' "|| {}"
-		ConvertFCodeTokensToForth.pl "${TempFolder}/Part2.txt" "" > "${dstFile4}" 2> "errors3.txt" || {}
+		#echo ConvertFCodeTokensToForth.pl '"'"${TempFolder}/Part2.txt"'"' '""' ">" '"'"${dstFile4}"'"' "2>" '"'"errors3.txt"'"' "|| :"
+		ConvertFCodeTokensToForth.pl "${TempFolder}/Part2.txt" "" > "${dstFile4}" 2> "errors3.txt" || :
 		if (( $(stat -f %z "errors3.txt") == 0 )); then
 			rm "errors3.txt"
 		fi
