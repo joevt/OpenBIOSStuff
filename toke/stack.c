@@ -1,10 +1,10 @@
 /*
- *                     OpenBIOS - free your system! 
+ *                     OpenBIOS - free your system!
  *                         ( FCode tokenizer )
- *                          
+ *
  *  stack.c - data and return stack handling for fcode tokenizer.
- *  
- *  This program is part of a free implementation of the IEEE 1275-1994 
+ *
+ *  This program is part of a free implementation of the IEEE 1275-1994
  *  Standard for Boot (Initialization Configuration) Firmware.
  *
  *  Copyright (C) 2001-2004 Stefan Reinauer, <stepan@openbios.org>
@@ -33,127 +33,101 @@
 #include "stream.h"
 
 
-#define GUARD_STACK
-#define EXIT_STACKERR
-
-#ifdef GLOBALSTACK
-#define STATIC static
-#else
-#define STATIC
-#endif
-STATIC stackitem *dstack,*startdstack,*enddstack;
-#undef STATIC
+static stackitem *dstack,*startdstack,*enddstack;
 
 /* internal stack functions */
 
 int init_stack(void)
 {
-	startdstack=enddstack=malloc(MAX_ELEMENTS*sizeof(stackitem));
+	startdstack=enddstack=(stackitem*)malloc(MAX_ELEMENTS*sizeof(stackitem));
 	enddstack+=MAX_ELEMENTS;
 	dstack=enddstack;
 	return 0;
 }
 
-#ifdef GLOBALSTACK 
+void clear_stack(void)
+{
+	if (dstack != enddstack) {
+		printf (FILE_POSITION "clear_stack: stack has %ld items\n",
+			iname, lineno, enddstack - dstack);
+		dstack = enddstack;
+	}
+}
 
-#ifdef GUARD_STACK
 static void stackerror(int stat)
 {
 	printf (FILE_POSITION "FATAL: stack %sflow\n",
 		iname, lineno,
 		(stat)?"under":"over" );
-#ifdef EXIT_STACKERR
 	exit(-1);
-#endif
-}
-#endif
-
-#endif
-
-
-#if 0
-
-static void dpush(long data)
-{
-#ifdef DEBUG_DSTACK
-	printf("dpush: sp=%p, data=0x%lx, ", dstack, data);
-#endif
-	--dstack;
-	dstack->type = 0;
-	dstack->data = data;
-#ifdef GUARD_STACK
-	if (dstack<startdstack) stackerror(0);
-#endif
 }
 
-static long dpop(void)
-{
-	long val;
-#ifdef DEBUG_DSTACK
-	printf("dpop: sp=%p, data=0x%lx, ", dstack, dstack->data);
-#endif
-	val=(dstack++)->data;
-#ifdef GUARD_STACK
-	if (dstack>enddstack) stackerror(1);
-#endif
-	return val;
-}
 
-static long dget(void)
-{
-	return dstack->data;
-}
-
-#endif
-
-
-void dpushtype(long type, long data)
+void dpushtype(long type, size_t data)
 {
 #ifdef DEBUG_DSTACK
 	printf("dpush: sp=%p, data=0x%lx, ",dstack, data);
 #endif
-	--dstack;
+	if (dstack<=startdstack)
+		stackerror(0);
+	else
+		--dstack;
 	dstack->type = type;
 	dstack->data = data;
-#ifdef GUARD_STACK
-	if (dstack<startdstack) stackerror(0);
-#endif
 }
 
 
-long dpoptype(long type)
+size_t dpoptype(long type)
 {
 	return dpoptypes( type, -1);
 }
 
 
-long dpoptypes(long type1, long type2)
+stackitem *dstackfindtype(long type)
 {
-	long val;
+	return dstackfindtypes(type, -1);
+}
+
+stackitem *dstackfindtypes(long type1, long type2)
+{
 	bool isNotFirst = FALSE;
-#ifdef DEBUG_DSTACK
-	printf("dpop: sp=%p, data=0x%lx, ", dstack, dstack->data);
-#endif
 	stackitem * curstack = dstack;
 	while (curstack <= enddstack)
 	{
 		if (curstack->type == type1 || curstack->type == type2)
 		{
-			val = curstack->data;
-			memmove( dstack + 1, dstack, (unsigned long)curstack - (unsigned long)dstack );
-			dstack++;
 			if ( isNotFirst )
 				printf (FILE_POSITION "WARNING: stack item possibly popped out of order\n",
 					iname, lineno);
-			return val;
+			return curstack;
 		}
 		curstack++;
 		isNotFirst = TRUE;
 	}
-	
-	val=(dstack++)->data;
-#ifdef GUARD_STACK
-	if (dstack>enddstack) stackerror(1);
+	return NULL;
+}
+
+size_t dpoptypes(long type1, long type2)
+{
+	size_t val = 0;
+#ifdef DEBUG_DSTACK
+	printf("dpop: sp=%p, data=0x%lx, ", dstack, dstack->data);
 #endif
+	stackitem * curstack = dstackfindtypes(type1, type2);
+	if (curstack)
+	{
+		val = curstack->data;
+		memmove( dstack + 1, dstack, (unsigned long)curstack - (unsigned long)dstack );
+		dstack++;
+		return val;
+	}
+
+	if (dstack>=enddstack)
+		stackerror(1);
+	else {
+		printf (FILE_POSITION "WARNING: Expecting pop %ld|%ld but got %ld\n",
+			iname, lineno, type1, type2, dstack->type);
+		val=(dstack++)->data;
+	}
 	return val;
 }

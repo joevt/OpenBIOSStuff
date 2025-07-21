@@ -74,7 +74,6 @@ u16  nextfcode;
 u8   base=0x0a;
 
 /* header pointers */
-u8  *fcode_hdr=NULL;
 u8  *pci_hdr=NULL;
 
 /* pci data */
@@ -967,7 +966,7 @@ static void handle_internal(u16 tok)
 	case FCODE_V1:
 		printf(FILE_POSITION "using version1 header\n", iname, lineno);
 		emit_token("version1");
-		fcode_hdr=opc;
+		dpushtype(kFCodeHeader,(unsigned long)opc);
 		emit_fcodehdr();
 		offs16=FALSE;
 		break;
@@ -976,7 +975,7 @@ static void handle_internal(u16 tok)
 	case FCODE_V2:
 	case FCODE_V3: /* Full IEEE 1275 */
 		emit_token("start1");
-		fcode_hdr=opc;
+		dpushtype(kFCodeHeader,(unsigned long)opc);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -985,7 +984,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 0 not supported.",
 				iname, lineno);
 		emit_token("start0");
-		fcode_hdr=opc;
+		dpushtype(kFCodeHeader,(unsigned long)opc);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -994,7 +993,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 2 not supported.",
 			iname, lineno);
 		emit_token("start2");
-		fcode_hdr=opc;
+		dpushtype(kFCodeHeader,(unsigned long)opc);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -1003,7 +1002,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 4 not supported.",
 			iname, lineno);
 		emit_token("start4");
-		fcode_hdr=opc;
+		dpushtype(kFCodeHeader,(unsigned long)opc);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;

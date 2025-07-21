@@ -59,7 +59,6 @@ extern u32 rom_size;
 
 
 /* header pointers */
-extern u8  *fcode_hdr;
 extern u8  *pci_hdr;
 
 extern bool haveend;
@@ -213,6 +212,12 @@ int finish_fcodehdr(void)
 	u16 checksum=0;
 	u32 len,i;
 
+	u8 *fcode_hdr;
+	if (dstackfindtype(kFCodeHeader))
+		fcode_hdr = (u8 *)dpoptype(kFCodeHeader);
+	else
+		fcode_hdr = NULL;
+
 	if(!fcode_hdr)
 	{
 		printf("warning: trying to fix up unknown fcode header\n");
@@ -228,16 +233,15 @@ int finish_fcodehdr(void)
 	for (i=8;i<len;i++)
 		checksum+=fcode_hdr[i-1];
 
-	dpushtype(kFCodeHeader, (unsigned long)opc);
+	u8 *saveopc = opc;
 	opc=fcode_hdr+1;
+	if (verbose)
+		printf("toke: checksum at 0x%lx is 0x%04x (%d bytes)\n",
+							(long)(opc - ostart), checksum, len);
 	emit_num16(checksum);
 	emit_num32(len);
-	opc=(u8 *)dpoptype(kFCodeHeader);
-	if (verbose)
-		printf("toke: checksum is 0x%04x (%d bytes)\n", 
-							checksum, len);
+	opc=saveopc;
 
-	fcode_hdr=NULL;
 	haveend=FALSE;
 	return 0;
 }
@@ -344,7 +348,7 @@ int finish_pcihdr(void)
 
 void finish_headers(void)
 {
-	if (fcode_hdr) finish_fcodehdr();
+	while (dstackfindtype(kFCodeHeader)) finish_fcodehdr();
 	if (pci_hdr) finish_pcihdr();
 	if (rom_size) {
 		int padding = rom_size-(opc-ostart);

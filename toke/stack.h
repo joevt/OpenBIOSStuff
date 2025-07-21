@@ -24,33 +24,24 @@
  *
  */
 
-#ifdef ANSI_ONLY
-#define GLOBALSTACK
-#endif
+#ifndef __STACK__
+#define __STACK__
 
 #define MAX_ELEMENTS 1024
 
-#ifdef GLOBALSTACK
 typedef struct stackitem {
 	long type;
-	long data;
+	size_t data;
 } stackitem;
 
-/*
-void dpush(long data);
-long dpop(void);
-long dget(void);
-*/
-void dpushtype(long type, long data);
-long dpoptype(long type);
-long dpoptypes(long type1, long type2);
-#else
-extern long *dstack,*startdstack;
-static inline void dpush(long data) { *(--dstack)=data; }
-static inline long dpop(void) { return (long)*(dstack++); }
-static inline long dget(void) { return *(dstack); }
-#endif
+void dpushtype(long type, size_t data);
+size_t dpoptype(long type);
+size_t dpoptypes(long type1, long type2);
+stackitem *dstackfindtype(long type);
+stackitem *dstackfindtypes(long type1, long type2);
 
 int init_stack(void);
+void clear_stack(void);
 u8 *get_stackstring(void);
 
+#endif
