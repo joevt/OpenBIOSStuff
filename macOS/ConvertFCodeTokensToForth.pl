@@ -41,6 +41,11 @@ $num++;
 while (/ s${num}s /) { $num++ }
 my $ck = "<_" . ${num} . "_>";
 $num++;
+while (/ s${num}s /) { $num++ }
+my $comment_sub = "<_" . ${num} . "_>";
+$num++;
+while (/ s${num}s /) { $num++ }
+my $blank_line = "<_" . ${num} . "_>";
 
 # figure out what the indent character is
 
@@ -80,8 +85,8 @@ if ($pciHeaderFile eq "") {
 
 # fcode-version2
 my $gotstart = 0;
-  s/start1 ((?:\\ \[0x0f1\] )?)\n  (format:    0x08)\n  (checksum:  0x[\da-f]+ \(.*?\))\n  (len:       0x[\da-f]+ \(\d+ bytes\))/fcode-version2 $1\n\\ $2\n\\ $3\n\\ $4\nhex\n\n/g && do { $gotstart = 1 }; timeit("gotstart1");
-s/version1 ((?:\\ \[0x0fd\] )?)\n  (format:    0x08)\n  (checksum:  0x[\da-f]+ \(.*?\))\n  (len:       0x[\da-f]+ \(\d+ bytes\))/fcode-version1 $1\n\\ $2\n\\ $3\n\\ $4\nhex\n\n/g && do { $gotstart = 1 }; timeit("version1");
+  s/(?<=\n)(${indents})start1 ((?:\\ \[0x0f1\] )?)\n\1  (format:    0x08)\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version2 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("gotstart1");
+s/(?<=\n)(${indents})version1 ((?:\\ \[0x0fd\] )?)\n\1  (format:    0x08)\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version1 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("version1");
 
 if ($gotstart == 0) {
 	print STDERR "# Didn't get start fcode.\n";
@@ -334,6 +339,8 @@ s/${cl}//g; timeit("remove control-l");
 s/(?<=\n)(${indentsnotgreedy})${indent}(then|until|again|endcase|endof|[+]?loop)\b/$1$2/mg || do { $missing .= "\nindent1" }; timeit("indent1");
 s/(?<=\n)(${indentsnotgreedy})${indent}${indent}(repeat)\b/$1$2/mg || do { $missing .= "\nindent2" }; timeit("indent2");
 
+s/(?<=\n)${indents}${blank_line}\n/\n/g; timeit("blank lines");
+
 #===================================================
 # Do formatting
 
@@ -397,6 +404,7 @@ s/(?<=\n)(.+?) (\\[^\n["]*)([][()\\ \da-fx-]*)(?{
 })$/$_l$_l2$_c$_c2$_i/mg; timeit("convert tabs to spaces");
 
 s/${slashreplacement}/\\${slashtabs}/g; timeit("restore slash definition");
+s/${comment_sub}/\\/g; timeit("comment slashes");
 
 s/(?<=\n)(?{$t=""})(?:    (?{$t.="\t"}))+/$t/g; timeit("convert indent spaces to tabs");
 #	while (/(?<=\n)((?:    )+)/mg) {
