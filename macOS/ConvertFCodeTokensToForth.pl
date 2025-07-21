@@ -34,12 +34,13 @@ $_ = "";
 	close FILE;
 }
 
-#90123
-#ijklm
-if (/[\cl\ck]/) {
-	print STDERR "# File contains ctrl-l or ctrl-k characters.\n";
-	exit 1; # make sure our special escape characters (ctrl-l and ctrl-k) doesn't exist}
-}
+my $num = 0;
+while (/ s${num}s /) { $num++ }
+my $cl = "<_" . ${num} . "_>";
+$num++;
+while (/ s${num}s /) { $num++ }
+my $ck = "<_" . ${num} . "_>";
+$num++;
 
 # figure out what the indent character is
 
@@ -160,46 +161,46 @@ foreach my $theword (@words) {
 		
 		if ($instancepart) {
 			if ($numpart) {
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaderless $+{r3}\ck$+{r1}$+{r2} $fcodetype \cl${unnameprefix}_\cl$+{r3}_$+{r2}\cl \\ \($+{r3} $+{r2}\)\cl $+{r6}\ck$+{r7}/mg || do { $missing .= "\ninstance \cknew\ck $numpart$fcodetype" }; timeit($unnameprefix . " num instance new" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaders $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\ninstance \cknamed\ck $numpart$fcodetype" }; timeit($unnameprefix . " num instance named" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckexternal $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\ninstance \ckexternal\ck $numpart$fcodetype" }; timeit($unnameprefix . " num instance external" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaderless $+{r3}\ck$+{r1}$+{r2} $fcodetype \cl${unnameprefix}_\cl$+{r3}_$+{r2}\cl \\ \($+{r3} $+{r2}\)\cl $+{r6}\ck$+{r7}/mg || do { $missing .= "\nvectored \cknew\ck $numpart$fcodetype" }; timeit($unnameprefix . " num vectored new" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaders $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\nvectored \cknamed\ck $numpart$fcodetype" }; timeit($unnameprefix . " num vectored named" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckexternal $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\nvectored \ckexternal\ck $numpart$fcodetype" }; timeit($unnameprefix . " num vectored external" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headerless $+{r3}${ck}$+{r1}$+{r2} $fcodetype ${cl}${unnameprefix}_${cl}$+{r3}_$+{r2}${cl} \\ \($+{r3} $+{r2}\)${cl} $+{r6}${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}new${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num instance new" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headers $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}named${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num instance named" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}external $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}external${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num instance external" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headerless $+{r3}${ck}$+{r1}$+{r2} $fcodetype ${cl}${unnameprefix}_${cl}$+{r3}_$+{r2}${cl} \\ \($+{r3} $+{r2}\)${cl} $+{r6}${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}new${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num vectored new" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headers $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}named${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num vectored named" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}external $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}external${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num vectored external" );
 			}
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaderless $+{r3}\ck$+{r1}$fcodetype \cl${unnameprefix}_\cl$+{r3}\cl \\ \($+{r3}\)\cl \ck$+{r7}/mg || do { $missing .= "\ninstance \cknew\ck $fcodetype" }; timeit($unnameprefix . " instance new" );
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaders $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\ninstance \cknamed\ck $fcodetype" }; timeit($unnameprefix . " instance named" );
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckexternal $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\ninstance \ckexternal\ck $fcodetype" }; timeit($unnameprefix . " instance external" );
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaderless $+{r3}\ck$+{r1}$fcodetype \cl${unnameprefix}_\cl$+{r3}\cl \\ \($+{r3}\)\cl \ck$+{r7}/mg || do { $missing .= "\nvectored \cknew\ck $fcodetype" }; timeit($unnameprefix . " vectored new" );
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckheaders $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\nvectored \cknamed\ck $fcodetype" }; timeit($unnameprefix . " vectored named" );
-			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}\ckexternal $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\nvectored \ckexternal\ck $fcodetype" }; timeit($unnameprefix . " vectored external" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headerless $+{r3}${ck}$+{r1}$fcodetype ${cl}${unnameprefix}_${cl}$+{r3}${cl} \\ \($+{r3}\)${cl} ${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}new${ck} $fcodetype" }; timeit($unnameprefix . " instance new" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headers $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}named${ck} $fcodetype" }; timeit($unnameprefix . " instance named" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}instance (?<r8>(\\ \[0x0c0\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}external $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\ninstance ${ck}external${ck} $fcodetype" }; timeit($unnameprefix . " instance external" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headerless $+{r3}${ck}$+{r1}$fcodetype ${cl}${unnameprefix}_${cl}$+{r3}${cl} \\ \($+{r3}\)${cl} ${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}new${ck} $fcodetype" }; timeit($unnameprefix . " vectored new" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}headers $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}named${ck} $fcodetype" }; timeit($unnameprefix . " vectored named" );
+			s/(?<=\n)(?<r1>${indents})(?<r4>(?:${indents}vectored (?<r8>(\\ \[0x${fcodep}\] )?)\n)*)${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /$+{r4}${ck}external $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\nvectored ${ck}external${ck} $fcodetype" }; timeit($unnameprefix . " vectored external" );
 		}
 		else {
 			if ($numpart) {
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckheaderless $+{r3}\ck$+{r1}$+{r2} $fcodetype \cl${unnameprefix}_\cl$+{r3}_$+{r2}\cl \\ \($+{r3} $+{r2}\)\cl $+{r6}\ck$+{r7}/mg || do { $missing .= "\n\cknew\ck $numpart$fcodetype" }; timeit($unnameprefix . " num new" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckheaders $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\n\cknamed\ck $numpart$fcodetype" }; timeit($unnameprefix . " num named" );
-				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckexternal $+{r3}\ck$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}\ck$+{r7}/mg || do { $missing .= "\n\ckexternal\ck $numpart$fcodetype" }; timeit($unnameprefix . " num external" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}headerless $+{r3}${ck}$+{r1}$+{r2} $fcodetype ${cl}${unnameprefix}_${cl}$+{r3}_$+{r2}${cl} \\ \($+{r3} $+{r2}\)${cl} $+{r6}${ck}$+{r7}/mg || do { $missing .= "\n${ck}new${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num new" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}headers $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\n${ck}named${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num named" );
+				s/(?<=\n)(?<r1>${indents})(?<r2>${number}) (?<r6>(?:\\ \[0x${fcodep}\] )?)\n${indents}external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}external $+{r3}${ck}$+{r1}$+{r2} $fcodetype $+{r5} \\ \($+{r3} $+{r2}\) $+{r6}${ck}$+{r7}/mg || do { $missing .= "\n${ck}external${ck} $numpart$fcodetype" }; timeit($unnameprefix . " num external" );
 			}
-			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckheaderless $+{r3}\ck$+{r1}$fcodetype \cl${unnameprefix}_\cl$+{r3}\cl \\ \($+{r3}\)\cl \ck$+{r7}/mg || do { $missing .= "\n\cknew\ck $fcodetype" }; timeit($unnameprefix . " new" );
-			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckheaders $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\n\cknamed\ck $fcodetype" }; timeit($unnameprefix . " named" );
-			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /\ckexternal $+{r3}\ck$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) \ck$+{r7}/mg || do { $missing .= "\n\ckexternal\ck $fcodetype" }; timeit($unnameprefix . " external" );
+			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*new-token (?<r7>(\\ \[0x${fcodep}\] )?)0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}headerless $+{r3}${ck}$+{r1}$fcodetype ${cl}${unnameprefix}_${cl}$+{r3}${cl} \\ \($+{r3}\)${cl} ${ck}$+{r7}/mg || do { $missing .= "\n${ck}new${ck} $fcodetype" }; timeit($unnameprefix . " new" );
+			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*named-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}headers $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\n${ck}named${ck} $fcodetype" }; timeit($unnameprefix . " named" );
+			s/(?<=\n)(?<r1>[$indentChar]*)[$indentChar]*external-token (?<r7>(\\ \[0x${fcodep}\] )?)(?<r5>[^ ]+) 0x(?<r3>[\da-f]+)\n${indents}b\($fcodetype\) /${ck}external $+{r3}${ck}$+{r1}$fcodetype $+{r5} \\ \($+{r3}\) ${ck}$+{r7}/mg || do { $missing .= "\n${ck}external${ck} $fcodetype" }; timeit($unnameprefix . " external" );
 		}
 	} else {
 		exit 1;
 	}
 }
 
-      s/(?<=\n)${indents}instance ((?:\\ \[0x0c0] )?)\n(\ck[^\ck\n]+\ck${indents}(?:(?:${number}) )?)([^\ck\n]+)/${2}instance $3$1/mg || do { $missing .= "\ninstance" }; timeit("move instance to between num and forth word");
-s/(?<=\n)${indents}vectored ((?:\\ \[0x${fcodep}] )?)\n(\ck[^\ck\n]+\ck${indents}(?:(?:${number}) )?)([^\ck\n]+)/${2}vectored $3$1/mg || do { $missing .= "\nvectored" }; timeit("move vectored to between num and forth word");
-s/(?<=\n)(\ck[^\ck\n]+\ck(${indents})(?:instance |vectored )?: )/$2\n$1/mg || do { $missing .= "\n:" }; timeit("place a carriage return before :");
-s/(?<=\n)(${indents})0 ((?:\\ \[0x${fcodep}\] )*)\n(\ck[^\ck\n]+\ck)(${indents}(?:[\da-f]+|\/\w+) field )/$3$1struct $2\n$4/mg || do { $missing .= "\nstruct" }; timeit("replace 0 with struct if it is located before a field instruction");
+      s/(?<=\n)${indents}instance ((?:\\ \[0x0c0] )?)\n(${ck}(?:(?!${ck}).)+${ck}${indents}(?:(?:${number}) )?)((?:(?!${ck}).)+)/${2}instance $3$1/mg || do { $missing .= "\ninstance" }; timeit("move instance to between num and forth word");
+s/(?<=\n)${indents}vectored ((?:\\ \[0x${fcodep}] )?)\n(${ck}(?:(?!${ck}).)+${ck}${indents}(?:(?:${number}) )?)((?:(?!${ck}).)+)/${2}vectored $3$1/mg || do { $missing .= "\nvectored" }; timeit("move vectored to between num and forth word");
+s/(?<=\n)(${ck}(?:(?!${ck}).)+${ck}(${indents})(?:instance |vectored )?: )/$2\n$1/mg || do { $missing .= "\n:" }; timeit("place a carriage return before :");
+s/(?<=\n)(${indents})0 ((?:\\ \[0x${fcodep}\] )*)\n(${ck}(?:(?!${ck}).)+${ck})(${indents}(?:[\da-f]+|\/\w+) field )/$3$1struct $2\n$4/mg || do { $missing .= "\nstruct" }; timeit("replace 0 with struct if it is located before a field instruction");
 
 my $lastToken = "";
 my $replacement = "";
 my $nextfcode = 0x800;
 # /m makes ^ = start of line; /g is required so that the next search will start at pos instead of 0.
-# We put the indent of the line after the \ck so get the tabs from there.
-while (/(?<=\n)(\ck(?<theToken>\w+) (?<thefcode>[\da-f]+)\ck(?<tabs>[\t]*))/mg) {
+# We put the indent of the line after the ${ck} so get the tabs from there.
+while (/(?<=\n)(${ck}(?<theToken>\w+) (?<thefcode>[\da-f]+)${ck}(?<tabs>[\t]*))/mg) {
 	$replacement = "";
 
 	if (hex($+{thefcode}) ne $nextfcode) {
@@ -219,9 +220,9 @@ while (/(?<=\n)(\ck(?<theToken>\w+) (?<thefcode>[\da-f]+)\ck(?<tabs>[\t]*))/mg) 
 	}
 } timeit("add headerless, headers and external compiler directives");
 
-s/(?<=\n)\ck[^\ck\n]+\ck//mg || do { $missing .= "\nnew, named, external" }; timeit("new, named, external");
+s/(?<=\n)${ck}(?:(?!${ck}).)+${ck}//mg || do { $missing .= "\nnew, named, external" }; timeit("new, named, external");
 
-s/\ck//g;
+s/${ck}//g;
 
 
 #s/([ \t\n])\(unnamed-fcode\)( \\ \[0x(${fcodep})\] )/$1unnamed-fcode_$3$2/g || do { $missing .= "\n(unnamed-fcode)" }; timeit("unnamed-fcode");
@@ -312,11 +313,11 @@ while (/(?<=\n)(${indents})(if) \\ \(0x[\da-f]{1,4}\) (?:\\ \[(?:0x014|0x3fe)\] 
 } timeit("if ... again then (from previous transformations above) -> while ... repeat");
 if ($repeats == 0) { $missing .= "\nwhile ... repeat" }
 
-s/(?<=\n)(${indents}): \clcolon_definition_function_\cl(${fcodep})\cl( .*\n\1${indent}\" ([^ \n\"]*)\" .*\n\1${indent}; )/$1: \clcolon_string_\cl$2_$4\cl$3/mg || do { $missing .= "\ncolon_string" }; timeit("colon_definition -> colon_string");
-s/(?<=\n)(${indents}): \clcolon_definition_function_\cl(${fcodep})\cl( .*\n\1${indent}(${number}) .*\n\1${indent}; )/$1: \clcolon_const_\cl$2_$4\cl$3/mg || do { $missing .= "\ncolon_const" }; timeit("colon_definition -> colon_const");
+s/(?<=\n)(${indents}): ${cl}colon_definition_function_${cl}(${fcodep})${cl}( .*\n\1${indent}\" ([^ \n\"]*)\" .*\n\1${indent}; )/$1: ${cl}colon_string_${cl}$2_$4${cl}$3/mg || do { $missing .= "\ncolon_string" }; timeit("colon_definition -> colon_string");
+s/(?<=\n)(${indents}): ${cl}colon_definition_function_${cl}(${fcodep})${cl}( .*\n\1${indent}(${number}) .*\n\1${indent}; )/$1: ${cl}colon_const_${cl}$2_$4${cl}$3/mg || do { $missing .= "\ncolon_const" }; timeit("colon_definition -> colon_const");
 
 my @fcodes;
-while (/\cl([^\cl]+)\cl((${fcodep})[^\cl]*)\cl([^\cl]*)\cl[^\n]*(\n)/g) {
+while (/${cl}((?:(?!${cl}).|\n)+)${cl}((${fcodep})(?:(?!${cl}).|\n)*)${cl}((?:(?!${cl}).|\n)*)${cl}[^\n]*(\n)/g) {
 	push @fcodes, [$+[4], $1.$2.$4, $3]
 } timeit("push fcodes");
 for my $fcode (reverse @fcodes) {
@@ -327,7 +328,7 @@ for my $fcode (reverse @fcodes) {
 #	}
 	substr($_, @$fcode[0]) =~ s/(?<=\s)unnamed_fcode_@$fcode[2](?=\s)/@$fcode[1]/g
 } timeit("rename unnamed fcodes that we have given names to");
-s/\cl//g; timeit("remove control-l");
+s/${cl}//g; timeit("remove control-l");
 
 # outdent (then, until, again, loop, +loop, endcase, and repeat) but don't outdent else because it was done above
 s/(?<=\n)(${indentsnotgreedy})${indent}(then|until|again|endcase|endof|[+]?loop)\b/$1$2/mg || do { $missing .= "\nindent1" }; timeit("indent1");
@@ -351,7 +352,9 @@ s/(?<=\n)(?{$t=""})(?:\t(?{$t.="    "}))+/$t/g; timeit("convert indent tabs to s
 
 
 # \ \ # the first slash is the name of the slash definition; the second slash is for the comment
-s/ \\ \\/ \ck \\/mg || do { $missing .= "\nslash definition" }; timeit("protect slash definition");
+my $slashreplacement = ${ck} . ("_" x (3-((length(${ck})+6) % 4)));
+my $slashtabs = "\t" x int(length($slashreplacement)/4);
+s/ \\ \\/ ${slashreplacement} \\/mg || do { $missing .= "\nslash definition" }; timeit("protect slash definition");
 
 my $_l = "";
 my $_c = "";
@@ -393,7 +396,7 @@ s/(?<=\n)(.+?) (\\[^\n["]*)([][()\\ \da-fx-]*)(?{
 	$_l2 =~ s: +:\t:;					# convert remaining spaces to a tab
 })$/$_l$_l2$_c$_c2$_i/mg; timeit("convert tabs to spaces");
 
-s/\ck/\\/g; timeit("restore slash definition");
+s/${slashreplacement}/\\${slashtabs}/g; timeit("restore slash definition");
 
 s/(?<=\n)(?{$t=""})(?:    (?{$t.="\t"}))+/$t/g; timeit("convert indent spaces to tabs");
 #	while (/(?<=\n)((?:    )+)/mg) {
