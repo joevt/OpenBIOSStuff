@@ -94,7 +94,7 @@ if ($gotstart == 0) {
 
 # fcode-end, pci-end
 my $gotend = 0;
-if ( s/(?<=\n)(${indents})(?:end0|b\(end0\)) (?:\\ \[0x000\] )?\n(\\ detokenizing finished after .*?bytes\.\n)/\n$1fcode-end\n$2/mg ) { $gotend = 1 }; timeit("gotend");
+if ( s/(?<=\n)(${indents})(?:end0|b\(end0\)) (?:\\ \[0x000\] )?\n((?:\\ detokenizing finished after .*?bytes\.\n)?)/$1${blank_line}\n$1fcode-end\n$2/mg ) { $gotend = 1 }; timeit("gotend");
 
 if ($pciHeaderFile ne "") {
 	$_ .= "pci-end\n";
