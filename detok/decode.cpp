@@ -45,7 +45,7 @@ const char * current_token_name;
 int gPass;
 
 int indent=0, use_tabs=0, verbose=0, decode_all=0, ignore_len=0, mac_rom=0, linenumbers=0;
-u32 romstartoffset = 0;
+s32 romstartoffset = 0;
 
 bool offs16;
 bool got_start;
@@ -69,7 +69,7 @@ void dump_line(u32 pos)
 			printf("%6d: ",linenum);
 
 		if (linenumbers & 2)
-			printf("%06X: ",pos + romstartoffset);
+			printf("%06X: ",(pos + romstartoffset) & 0xFFFFFF);
 	}
 }
 
@@ -506,7 +506,7 @@ static void decode_start(void)
 			set_streampos(current_token_pos);
 			decode_lines();
 			if ( gPass )
-				printf ("\\ detokenizing start at offset %06X\n", current_token_pos + romstartoffset);
+				printf ("\\ detokenizing start at offset %06X\n", (current_token_pos + romstartoffset) & 0xFFFFFF);
 			dump_line( current_token_pos );
 		}
 

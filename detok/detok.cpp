@@ -228,11 +228,13 @@ badoption:
 			continue;
 		}
 			
+/*
 		if (filelen + romstartoffset > 0x100000000 ) {
 			printf ("startoffset is too large \"%s\".\n",argv[optind]);
 			optind++;
 			continue;
 		}
+*/
 		
 		fclen=(u32)filelen;
 		detokenize();
