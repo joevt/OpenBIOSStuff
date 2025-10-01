@@ -33,6 +33,7 @@ fi
 
 dumpRomDictionary=0
 romStartOffset=0
+hasRomStart=0
 
 while ((1)); do
 	if [[ "${1}" == "-d" ]]; then
@@ -41,6 +42,7 @@ while ((1)); do
 	elif [[ "${1}" == "-s" ]]; then
 		shift
 		romStartOffset="${1}"
+		hasRomStart=1
 		shift
 	elif [[ "${1}" == "-m" ]]; then
 		shift
@@ -163,6 +165,16 @@ DumpMacRomDoErrors () {
 	fi
 
 	printf "# macrom = 0x%x\n" "${macrom}"
+
+	if ((0)); then
+		# Exclude the coff header if it exists.
+		if ((hasRomStart == 0)); then
+			coffheader="$(dd if="${romFile}" bs=0x3C count=1 2> /dev/null | xxd -p -c 100)"
+			if perl -ne 'exit ((/^01df0001476172790{24}2e746578740{24}\w{6}0{6}3c0{30}20$/) ? 0 : 1)' <<< "$coffheader"; then
+				romStartOffset="$((0x100000000-0x3c))"
+			fi
+		fi
+	fi
 
 	#echo "# " detok -t -v -a -n -o -i -m '"'"${macrom}"'"' -s '"'"${romStartOffset}"'"' '"'"${romFile}"'"' " 2> " '"'"${TempFolder}/errors.txt"'"' " > " '"'"${TempFolder}/All0.txt"'"'
 	detok -t -v -a -n -o -i -m "${macrom}" -s "${romStartOffset}" "${romFile}" 2> "${TempFolder}/errors.txt" > "${TempFolder}/All0.txt"
