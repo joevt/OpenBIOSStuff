@@ -9,9 +9,9 @@ if [[ ! -f $script_full_path/ConvertFCodeTokensToForth.pl ]]; then
 	script_full_path=$(dirname "$(command -v "$script_name")")
 fi
 
-echo "# Working Path: "$(pwd) 1>&2
-echo "# Script Name: "$script_name 1>&2
-echo "# Script Path: "$script_full_path 1>&2
+echo "# Working Path: $(pwd)" 1>&2
+echo "# Script Name: $script_name" 1>&2
+echo "# Script Path: $script_full_path" 1>&2
 
 extractpart=-1
 isanother=0
@@ -66,7 +66,7 @@ RomStart=0
 RomFileSize=$(wc -c < "${theROM}")
 
 TempFolder="$(mktemp -d /tmp/DumpPCIRom.XXXXXX)"
-echo "# TempFolder: "$TempFolder 1>&2
+echo "# TempFolder: $TempFolder" 1>&2
 
 didDetok=0
 detokErrors="/${TempFolder}/detokErrors.txt"
@@ -86,6 +86,7 @@ while true; do
 	vpd=$(xxd -p -r <<< "${romhex:(RomStart*2):28*2}" | xxd -u -g 4 -c 28)
 	#echo "# got vpd: '$vpd'" 1>&2
 	
+	#                1     2   3    4       5   6   7          8  9
 	pat='^........: (....)(..)(..) (.{44}) (..)(..)(....)  ...(.)(.{20})....'
 	if [[ ${vpd} =~ $pat ]] ; then
 		PciMagicNumber=${BASH_REMATCH[1]}
@@ -222,7 +223,7 @@ while true; do
 		fi
 	
 		if [[ ${PointerPCIDataStructure} != 001C ]] ; then
-			dump1=$((${RomStart} + 28))
+			dump1=$((RomStart + 28))
 			varBytes="$(
 				xxd -p -r <<< "${romhex:(dump1)*2:$((0x${PointerPCIDataStructure} - 28))*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/' | perl -pE 's/^(\\ +\w+:)/uc $1/e'
 			)"
@@ -367,7 +368,7 @@ while true; do
 		xxd -p -r <<< "${romhex:(startOffset)*2:(RomStart + ImageBytes - startOffset)*2}" > "${sourceFCode}"
 		if [[ "${codeTypeString}" == "BIOS" ]] ; then
 			thechecksum="${romhex:(RomStart + ImageBytes - 1)*2:2}"
-			expectedchecksum=$(printf "%02X" $(( ( 0x100 $(perl -pE "s/(..)/-0x\1/g" <<< "${romhex:(RomStart * 2):(ImageBytes - 1)*2}") ) & 0xFF )))
+			expectedchecksum="$( perl -ne '$sum = 0; while (/(..)/g) { $sum -= hex($1); } printf("%02X", $sum & 0xFF)' <<< "${romhex:(RomStart * 2):(ImageBytes - 1)*2}" )"
 		fi
 	else
 		startOffset=${RomStart}
@@ -399,7 +400,7 @@ while true; do
 				didDetok=1
 				detok -t ${detokoptions} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
 				echo 1>&2
-				perl $script_full_path/ConvertFCodeTokensToForth.pl "${sourceFCode}.of" "${pciHeaderFile}"
+				perl "$script_full_path/ConvertFCodeTokensToForth.pl" "${sourceFCode}.of" "${pciHeaderFile}"
 			else
 				if [[ -n "${pciHeaderFile}" ]] ; then
 					cat "${pciHeaderFile}"
