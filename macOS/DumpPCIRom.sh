@@ -17,10 +17,16 @@ extractpart=-1
 isanother=0
 listparts=0
 dumppciheader=1
-detokoptions=""
+detokoption1=""
+detokoption2=""
 while ((1)); do
+	if [[ $1 == "-a" ]]; then
+		detokoption1="-a"
+		shift
+		continue
+	fi
 	if [[ $1 == "-v" ]]; then
-		detokoptions="-v"
+		detokoption2="-v"
 		shift
 		continue
 	fi
@@ -398,7 +404,8 @@ while true; do
 
 			if [[ "${codeTypeString}" == "Open Firmware" ]] ; then
 				didDetok=1
-				detok -t ${detokoptions} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
+				echo detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" ">" "${sourceFCode}.of" "2>>" "${detokErrors}" >> "${detokErrors}"
+				detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
 				echo 1>&2
 				perl "$script_full_path/ConvertFCodeTokensToForth.pl" "${sourceFCode}.of" "${pciHeaderFile}"
 			else
