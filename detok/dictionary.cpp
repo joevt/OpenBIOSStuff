@@ -814,12 +814,26 @@ void init_dictionary(void)
 	{
 /* tokens used by all Power Macs */
 
+		add_token( 0x400, "b(immediate)" );
+
 		if (mac_rom & 0x901) {
 			// Open Firmware 1.0.5
 			make_of_token( add_token( 0x401, "b(pushlocals)" ), "" ); /* local variables { local_0 ... local_n-1 ; ... } */
+			add_token( 0x402, "b(allot)" );
+			add_token( 0x403, "(abort\")" );
+			add_token( 0x404, "spin" );
+			add_token( 0x405, "spin-every" );
+			add_token( 0x406, "brpatch" );
+			add_token( 0x407, "blpatch" );
 		}
 		else {
 			// Open Firmware 2.0 and later
+			add_token( 0x401, "b(allot)" );
+			add_token( 0x402, "(abort\")" );
+			add_token( 0x403, "spin" );
+			add_token( 0x404, "spin-every" );
+			add_token( 0x405, "brpatch" );
+			add_token( 0x406, "blpatch" );
 			make_of_token( add_token( 0x407, "b(pushlocals)" ), "{ ; ... }" );
 			add_token( 0x408, "{ local_0 ; ... }" );
 			add_token( 0x409, "{ local_0 local_1 ; ... }" );
