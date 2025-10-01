@@ -6,7 +6,8 @@
 extern int use_tabs, verbose, decode_all, ignore_len, mac_rom, linenumbers;
 extern u32 current_token_pos;
 extern u16 current_token_fcode;
-extern u32 romstartoffset;
+extern s64 romstartoffset;
+extern u32 addressmask;
 extern u32 gStartPos, gLastPos, gLastFcodeImageEndPos;
 extern int gPass, gLastMacRomTokenPos;
 extern bool got_start, isSpecialStart;

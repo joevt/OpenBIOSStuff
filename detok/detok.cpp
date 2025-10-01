@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 #ifdef __GLIBC__
 #define _GNU_SOURCE
 #define LONGOPT
@@ -158,13 +159,20 @@ int main(int argc, char **argv)
 			break;
 		case 's':
 			if (optarg==NULL || optarg[0]==0)
+			{
 				romstartoffset = 0;
+				addressmask = 0xffffff;
+			}
 			else
 			{
-				if ( !sscanf( optarg, "$%x", &romstartoffset ) )
-				if ( !sscanf( optarg, "0x%x", &romstartoffset ) )
-				if ( !sscanf( optarg, "%d", &romstartoffset ) )
+				if ( !sscanf( optarg, "$%" SCNx64, &romstartoffset ) )
+				if ( !sscanf( optarg, "0x%" SCNx64, &romstartoffset ) )
+				if ( !sscanf( optarg, "%" SCNd64, &romstartoffset ) )
 					goto badoption;
+				if (romstartoffset >= 0)
+					addressmask = 0xffffffff;
+				else
+					addressmask = 0xffffff;
 			}
 			break;
 		case 'd':
@@ -228,11 +236,13 @@ badoption:
 			continue;
 		}
 			
+/*
 		if (filelen + romstartoffset > 0x100000000 ) {
 			printf ("startoffset is too large \"%s\".\n",argv[optind]);
 			optind++;
 			continue;
 		}
+*/
 		
 		fclen=(u32)filelen;
 		detokenize();

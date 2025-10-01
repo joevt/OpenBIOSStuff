@@ -428,7 +428,7 @@ static char * MyDisassemblerLookups(
 }
 #endif /* !USECAPSTONE */
 
-static void dumptokenline( u32 tokenAddress, u32 theNum, u32 currentPos )
+static void dumptokenline( s64 tokenAddress, u32 theNum, u32 currentPos )
 {
 	if ( gPass )
 	{
@@ -442,17 +442,17 @@ static void dumptokenline( u32 tokenAddress, u32 theNum, u32 currentPos )
 		}
 		else
 		{
-			s32					tokenOffset;
+			s64					tokenOffset;
 			token_t*			theToken;
 			u32					offsetFromTokenStart;
 
 			tokenOffset = tokenAddress - romstartoffset;
-			theToken = find_token_by_pos( tokenOffset, &offsetFromTokenStart );
+			theToken = find_token_by_pos( (u32)tokenOffset, &offsetFromTokenStart );
 		
 			if ( theToken == NULL )
-				snprintf( operand, sizeof(operand), "$%+d", tokenOffset - currentPos );
+				snprintf( operand, sizeof(operand), "$%+" PRId64, tokenOffset - currentPos );
 			else if ( offsetFromTokenStart )
-				snprintf( operand, sizeof(operand), "%s%+d", theToken->name, offsetFromTokenStart );
+				snprintf( operand, sizeof(operand), "%s%+" PRId32, theToken->name, offsetFromTokenStart );
 			else
 				strcpy( operand, theToken->name );
 		}
@@ -462,7 +462,7 @@ static void dumptokenline( u32 tokenAddress, u32 theNum, u32 currentPos )
 		dump_buffer_hex( storebe( theNum, bytes ), 4, 2 );
 		make_buffer_text( instructionText, bytes, 4 );
 
-		snprintf( comment, sizeof(comment), "%08X", tokenAddress );
+		snprintf( comment, sizeof(comment), "%08" PRIX64, tokenAddress );
 		printf( "%12s          %-8s %-39s \"%s\"\n", comment, "dc.l", operand, instructionText );
 	}
 	else
@@ -792,7 +792,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 #ifdef USECAPSTONE
 						cs_insn *insn = NULL;
 						size_t count = cs_check() ?
-							cs_disasm( handle, (uint8_t*)&instructionMem, sizeof(instructionMem), romstartoffset + currentPos, 0, &insn )
+							cs_disasm( handle, (uint8_t*)&instructionMem, sizeof(instructionMem), u32(romstartoffset + currentPos), 0, &insn )
 						:
 							0;
 						if ( count && insn ) {
@@ -857,7 +857,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 				instruction = get_num32BE((u8*)&instructionMem);
 				if ( gLastTokenIsAlias )
 				{
-					u32 tokenAddress = instruction + currentPos + romstartoffset;
+					s64 tokenAddress = instruction + currentPos + romstartoffset;
 					dumptokenline( tokenAddress, instruction, currentPos );
 					currentPos += 4;
 					gLastTokenIsAlias = FALSE;
@@ -874,7 +874,7 @@ void disassemble_lines(const u32 endPos, u32 currentPos)
 
 						cs_insn *insn = NULL;
 						size_t count = cs_check() ?
-							cs_disasm( handle, (uint8_t*)&instructionMem, sizeof(instructionMem), romstartoffset + currentPos, 0, &insn )
+							cs_disasm( handle, (uint8_t*)&instructionMem, sizeof(instructionMem), u32(romstartoffset + currentPos), 0, &insn )
 						:
 							0;
 						if ( count && insn ) {
@@ -2164,7 +2164,7 @@ doimm:
 						if ( currentPos < instructionEnd && !strcmp( mnemonic, "bl" ) )
 						{
 							u32 theNum;
-							u32 tokenAddress;
+							s64 tokenAddress;
 							
 							if ( gDissasembledTokenOffset == 0 ) {
 								if ( !strcmp( gDissasembledToken->name, "{'}" ) )
@@ -2527,7 +2527,7 @@ set-token
 			u8 bytes[4];
 			dump_hex_one_line( storebe( previous_token_offset, bytes ), 4 );
 			if ( gPass )
-				fprintf(stderr, "Line %d # Offset %06X; Previous token offset is 0\n", linenum, current_token_pos - 5 + romstartoffset);
+				fprintf(stderr, "Line %d # Offset %06X; Previous token offset is 0\n", linenum, (u32)(current_token_pos - 5 + romstartoffset) & addressmask);
 		}
 		else
 		{
@@ -2537,7 +2537,7 @@ set-token
 			{
 				set_streampos(current_token_pos - 5);
 				decode_lines();
-				dumptokenoffset( previous_token_offset, caclulated_previous_rom_token_pos + romstartoffset );
+				dumptokenoffset( previous_token_offset, (u32)(caclulated_previous_rom_token_pos + romstartoffset) );
 			}
 			else if ( previous_token_offset < 0 && caclulated_previous_rom_token_pos >= 0 )
 			{
@@ -2548,14 +2548,18 @@ set-token
 				{
 					set_streampos(current_token_pos - 5);
 					decode_lines();
-					dumptokenoffset( previous_token_offset, caclulated_previous_rom_token_pos + romstartoffset );
+					dumptokenoffset( previous_token_offset, (u32)(caclulated_previous_rom_token_pos + romstartoffset) );
 					if ( !gPass )
-						fprintf(stderr, "Line %d # Offset %06X; Token offset points to %s at %06X\n", linenum, current_token_pos - 5 + romstartoffset, backtoken->name, backtoken->execution_pos + romstartoffset );
+						fprintf(stderr, "Line %d # Offset %06X; Token offset points to %s at %06X\n", linenum,
+							(u32)(current_token_pos - 5 + romstartoffset) & addressmask, backtoken->name,
+							(u32)(backtoken->execution_pos + romstartoffset) & addressmask );
 				}
 				else
 				{
 					if ( !gPass )
-						fprintf(stderr, "Line %d # Offset %06X; Previous token offset %06X -> %06X doesn’t have a token\n", linenum, current_token_pos - 5 + romstartoffset, previous_token_offset, caclulated_previous_rom_token_pos + romstartoffset );
+						fprintf(stderr, "Line %d # Offset %06X; Previous token offset %06X -> %06X doesn’t have a token\n", linenum,
+							(u32)(current_token_pos - 5 + romstartoffset) & addressmask, previous_token_offset & addressmask,
+							(u32)(caclulated_previous_rom_token_pos + romstartoffset) & addressmask );
 					set_streampos( defined_token_pos );
 					return;
 				}
@@ -2569,7 +2573,7 @@ set-token
 
 			if ( previous_token_offset & 7 )
 				if ( !gPass )
-					fprintf(stderr, "Line %d # Offset %06X; Previous token offset should be a multiple of 8\n", linenum, current_token_pos - 5 + romstartoffset);
+					fprintf(stderr, "Line %d # Offset %06X; Previous token offset should be a multiple of 8\n", linenum, (u32)(current_token_pos - 5 + romstartoffset) & addressmask);
 		}
 	}
 
@@ -2798,7 +2802,7 @@ set-token
 		{
 			/* this should never happen */
 			theToken = NULL;
-			fprintf(stderr, "Line %d # Could not find token for offset 0x%06X\n", linenum, token_code_pos );
+			fprintf(stderr, "Line %d # Could not find token for offset 0x%06X\n", linenum, token_code_pos & addressmask );
 			printf("0x%03x \\ token not found\n", definedFCodeNumber);
 		}
 		else if ( good_token_name )
@@ -2870,7 +2874,7 @@ static void got_special_start(void) {
 	isSpecialStart = TRUE;
 	decode_lines();
 	if ( gPass )
-		printf ("\\ detokenizing start at offset %06X\n", current_token_pos + 1 + romstartoffset);
+		printf ("\\ detokenizing start at offset %06X\n", (u32)(current_token_pos + 1 + romstartoffset) & addressmask);
 	mark_last_streampos();
 	if ( !gPass )
 		fprintf(stderr, "Line %d # Unknown start\n", linenum);
