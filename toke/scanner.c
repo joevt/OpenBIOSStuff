@@ -74,17 +74,34 @@ u16  nextfcode;
 u8   base=0x0a;
 
 /* header pointers */
-u8  *pci_hdr=NULL;
+u8  *pci_hdr;
 
 /* pci data */
-bool pci_is_last_image=TRUE;
-bool pci_want_header=FALSE;
-u16  pci_revision=0x0001;
-u16  pci_vpd=0x0000;
-u16  processor_architecture=0x0034;
-u16  pci_data_structure_start=0x001C;
-u16  pci_data_structure_length=0x0018;
-u32  rom_size=0;
+bool pci_is_last_image;
+bool pci_want_header;
+u16  pci_revision;
+u16  pci_vpd;
+bool got_processor_architecture;
+u16  processor_architecture;
+u16  pci_data_structure_start;
+u16  pci_data_structure_length;
+u32  rom_size = 0;
+bool got_pci_entry;
+u32 pci_entry;
+
+void pci_reset( void ) {
+	pci_hdr=NULL;
+	pci_is_last_image=TRUE;
+	pci_want_header=FALSE;
+	pci_revision=0x0001;
+	pci_vpd=0x0000;
+	got_processor_architecture=FALSE;
+	processor_architecture=0;
+	pci_data_structure_start=0x001C;
+	pci_data_structure_length=0x0018;
+	got_pci_entry=FALSE;
+	pci_entry=0;
+}
 
 bool offs16=TRUE;
 static bool intok=FALSE, incolon=FALSE, in_to=FALSE, in_instance=FALSE;
@@ -1056,9 +1073,36 @@ static void handle_internal(u16 tok)
 		break;
 
 	case PCIARCH:
+		if (got_pci_entry) {
+			printf("error: Only one of pci-architecture and pci-entry is allowed\n");
+			ERROR;
+		}
 		processor_architecture=dpoptype(kToke);
 		printf(FILE_POSITION "Processor Architecture=0x%04x\n",
 				iname, lineno, processor_architecture);
+		got_processor_architecture = TRUE;
+		break;
+
+	case PCIENTRY:
+		if(got_pci_entry) {
+			printf(FILE_POSITION "error: Only one occurrance of pci-entry is allowed\n",
+					iname, lineno);
+			ERROR;
+		}
+		if(!pci_hdr) {
+			printf(FILE_POSITION "error: pci-entry must follow pci_hdr\n",
+					iname, lineno);
+			ERROR;
+		}
+		pci_entry = (u32)(opc-pci_hdr);
+		if (pci_entry > 0xFFFF) {
+			printf(FILE_POSITION "error: pci-entry must be within 64K of the start of the image\n",
+					iname, lineno);
+			ERROR;
+		}
+		printf(FILE_POSITION "Pointer to FCode program=0x%04x\n",
+				iname, lineno, pci_entry);
+		got_pci_entry = TRUE;
 		break;
 
 	case PCIDATASTRUCTURESTART:

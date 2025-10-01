@@ -284,12 +284,15 @@ while true; do
 		fi
 	
 		if (( dumppciheader )); then
-		(
+		{
 			printf "\\                   PCI expansion PROM header\n"
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  0))" "PCI magic number (55AA)" "${PciMagicNumber}"
 		if (( CodeType == 0 )); then
 			printf "\\        %08X: %52s: %s (* 0x200 = 0x%X)\n"    "$((RomStart+  2))" "Image Length in 512 bytes" "${BIOSImageLength}" "$((0x$BIOSImageLength * 512))"
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  3))" "${Entry_point}" "${BIOSData}"
+		elif (( CodeType == 1 )); then
+			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  2))" "Pointer to FCode program" "${ProcessorArchitecture}"
+			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  4))" "Reserved for processor architecture-unique data" "${ProcessorArchitectureUniqueData}"
 		elif (( CodeType == 3 )); then
 			printf "\\        %08X: %52s: %s (* 0x200 = 0x%X)\n"    "$((RomStart+  2))" "EFI initialization size in 512 bytes" "${EFIInitializationSize}" "$((0x$EFIInitializationSize * 512))"
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  4))" "EFI Signature (00000EF1)" "${EFISignature}"
@@ -341,8 +344,8 @@ while true; do
 				if [[ "${PointerVitalProductData}" != "0000" ]] ; then
 					echo "tokenizer[ ${PointerVitalProductData} ]tokenizer set-vpd-offset"
 				fi
-	
-				if [[ "${ProcessorArchitecture}" != "0034" ]] ; then
+
+				if (( CodeType != 1 )) ; then
 					echo "tokenizer[ ${ProcessorArchitecture} ]tokenizer pci-architecture"
 				fi
 	
@@ -358,9 +361,25 @@ while true; do
 	
 				echo "tokenizer[ ${ImageBytesHex} ]tokenizer rom-size"
 	
+				if (( CodeType == 1 )) ; then
+					if (( 0x${ProcessorArchitecture} != 0x${PointerPCIDataStructure} + 0x${PCIDataStructureLength} )) ; then
+						(( preFcodeBytesLen = 0x${ProcessorArchitecture} - 0x${PointerPCIDataStructure} - 0x${PCIDataStructureLength} ))
+						if (( preFcodeBytesLen < 0 )) ; then
+							printf "# Pointer to FCode program should be at least 0x%04X\n" $(( 0x${PointerPCIDataStructure} + 0x${PCIDataStructureLength} )) 1>&2
+						else
+							echo
+							printf "tokenizer[\n"
+								perl -ne 'while (/(..)/g) { printf("\t%02X emit-byte\n", hex($1)); }' <<< "${romhex:(offset2*2):(preFcodeBytesLen*2)}"
+							printf "]tokenizer\n\n"
+							printf "pci-entry\n"
+							(( offset2 += preFcodeBytesLen ))
+						fi
+					fi
+				fi
+
 				echo
 			fi
-		) > "${TempFolder}/PCIHeader${part}"
+		} > "${TempFolder}/PCIHeader${part}"
 		fi
 	else
 		printf "# No PCI Header\n" 1>&2

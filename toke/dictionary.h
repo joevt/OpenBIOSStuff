@@ -94,6 +94,7 @@
 #define PCIDATASTRUCTURESTART	0xe2
 #define PCIDATASTRUCTURELENGTH	0xe3
 #define ROMSIZE					0xe4
+#define PCIENTRY				0xe5
 
 #define NEXTFCODE	0xef
 

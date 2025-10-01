@@ -84,6 +84,7 @@ static void usage(char *name)
 
 int main(int argc, char **argv)
 {
+	pci_reset();
 	const char *optstring="vhilo:?";
 	char *outputname = NULL;
 	int c;
