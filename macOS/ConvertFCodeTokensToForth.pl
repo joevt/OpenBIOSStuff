@@ -85,8 +85,8 @@ if ($pciHeaderFile eq "") {
 
 # fcode-version2
 my $gotstart = 0;
-  s/(?<=\n)(${indents})start1 ((?:\\ \[0x0f1\] )?)\n\1  (format:    0x08)\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version2 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("gotstart1");
-s/(?<=\n)(${indents})version1 ((?:\\ \[0x0fd\] )?)\n\1  (format:    0x08)\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version1 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("version1");
+  s/(?<=\n)(${indents})start1 ((?:\\ \[0x0f1\] )?)\n\1  (format:    0x0[0-9a-f])\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version2 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("gotstart1");
+s/(?<=\n)(${indents})version1 ((?:\\ \[0x0fd\] )?)\n\1  (format:    0x0[0-9a-f])\n\1  (checksum:  0x[\da-f]+ \(.*?\))\n\1  (len:       0x[\da-f]+ \(\d+ bytes\))\n/$1fcode-version1 $2\n$1${comment_sub} $3\n$1${comment_sub} $4\n$1${comment_sub} $5\n$1hex\n$1${blank_line}\n/g && do { $gotstart = 1 }; timeit("version1");
 
 if ($gotstart == 0) {
 	print STDERR "# Didn't get start fcode.\n";
