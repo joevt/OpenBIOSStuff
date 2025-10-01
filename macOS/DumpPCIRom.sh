@@ -406,6 +406,9 @@ while true; do
 				didDetok=1
 				echo detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" ">" "${sourceFCode}.of" "2>>" "${detokErrors}" >> "${detokErrors}"
 				detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
+
+				detok -t -n -o -v "${sourceFCode}" > "${sourceFCode}2.of" 2>> "/${TempFolder}/detokErrors2.txt"
+
 				echo 1>&2
 				perl "$script_full_path/ConvertFCodeTokensToForth.pl" "${sourceFCode}.of" "${pciHeaderFile}"
 			else
