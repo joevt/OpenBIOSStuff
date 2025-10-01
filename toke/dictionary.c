@@ -616,4 +616,5 @@ void init_dictionary(void)
 	add_special(PCIDATASTRUCTURELENGTH,	"pci-data-structure-length");
 	add_special(VPDOFFSET,	"set-vpd-offset");
 	add_special(ROMSIZE,	"rom-size");
+	add_special(PCIENTRY, "pci-entry");
 }

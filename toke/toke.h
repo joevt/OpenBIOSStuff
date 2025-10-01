@@ -50,5 +50,6 @@ extern char	*lookup_macro(char *name);
 extern int	add_token(u16 number, char *name);
 extern int	add_token_with_type(u16 number, char *name, u16 type);
 extern int	add_macro(char *name, char *alias);
+extern void pci_reset( void );
 
 #endif   /* _H_TOKE */

@@ -56,6 +56,8 @@ extern u16 processor_architecture;
 extern u16 pci_data_structure_start;
 extern u16 pci_data_structure_length;
 extern u32 rom_size;
+extern bool got_pci_entry;
+extern u32 pci_entry;
 
 
 /* header pointers */
@@ -253,7 +255,7 @@ int emit_pcihdr(u16 vid, u16 did, u32 classid)
 	/* PCI start signature */
 	emit_byte(0x55); emit_byte(0xaa);
 	
-	/* Processor architecture */
+	/* Processor architecture / Pointer to FCode program */
 	emit_byte(0x00); emit_byte(0x00);
 
 	/* 20 bytes of padding */
@@ -308,14 +310,19 @@ int finish_pcihdr(void)
 	if(!pci_hdr)
 	{
 		printf("error: trying to fix up unknown pci header\n");
+		pci_reset();
 		return -1;
 	}
 
 	tpc=opc;
 
-	/* fix up processor architecture */
+	/* fix up processor architecture / pointer to FCode program */
 	opc=pci_hdr+2;
-	emit_byte(processor_architecture); emit_byte(processor_architecture>>8);
+	if (got_pci_entry) {
+		emit_byte(pci_entry); emit_byte(pci_entry>>8);
+	} else {
+		emit_byte(processor_architecture); emit_byte(processor_architecture>>8);
+	}
 
 	/* fix up vpd */
 	opc=pci_hdr+pci_data_structure_start+8;
@@ -339,8 +346,8 @@ int finish_pcihdr(void)
 	printf("Adding %d bytes of zero padding to PCI image.\n",padding);
 	while (padding--)
 		emit_byte(0);
-	
-	pci_hdr=NULL;
+
+	pci_reset();
 	return 0;
 }
 
