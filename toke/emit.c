@@ -262,10 +262,8 @@ int emit_pcihdr(u16 vid, u16 did, u32 classid)
 	/* pointer to start of PCI data structure */
 	emit_byte(pci_data_structure_start); emit_byte(pci_data_structure_start>>8);
 
-	/* 2 bytes of zero padding */
-	emit_byte(0x00); emit_byte(0x00);
-
-	for (i=0; i<pci_data_structure_start-0x1c; i++) emit_byte(0x00);
+	/* Variable length pad bytes (at least two if pci_data_structure_start is 0x1C) */
+	for (i=0; i<pci_data_structure_start-0x1a; i++) emit_byte(0x00);
 	
 	/* PCI Data structure */
 	emit_byte('P'); emit_byte('C'); emit_byte('I'); emit_byte('R');

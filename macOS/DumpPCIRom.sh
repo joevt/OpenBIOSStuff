@@ -227,14 +227,23 @@ while true; do
 		else
 			PCIDataStructureRevisionString=""
 		fi
-	
-		if [[ ${PointerPCIDataStructure} != 001C ]] ; then
+
+		varBytes=""
+		if ((0x${PointerPCIDataStructure} < 0x1A)); then
+			printf "# PointerPCIDataStructure = 0x%X; expected 0x1A or greater\n" $((0x${PointerPCIDataStructure})) 1>&2
+			exit 1
+		elif ((0x${PointerPCIDataStructure} == 0x1A)); then
+			# 0x1A is valid for Open Firmware images - see "PCI Bus Binding to Open Firmware" spec
+			#printf "# PointerPCIDataStructure = 0x%X; Pad bytes is removed\n" $((0x${PointerPCIDataStructure})) 1>&2
+			PadBytes=""
+		elif ((0x${PointerPCIDataStructure} == 0x1B)); then
+			printf "# PointerPCIDataStructure = 0x%X; Pad bytes is truncated\n" $((0x${PointerPCIDataStructure})) 1>&2
+			PadBytes="${PadBytes:0:2}"
+		elif ((0x${PointerPCIDataStructure} > 0x1C)); then
 			dump1=$((RomStart + 28))
 			varBytes="$(
 				xxd -p -r <<< "${romhex:(dump1)*2:$((0x${PointerPCIDataStructure} - 28))*2}" | xxd -u -o $dump1 -c 32 -g 4 | sed -E '/(.*)/s//\\\        \1/' | perl -pE 's/^(\\ +\w+:)/uc $1/e'
 			)"
-		else
-			varBytes=""
 		fi
 
 		if (( 0x$PCIDataStructureLength != 0x0018 + (PCIDataStructureRevision == 3 ? 4 : 0) )) ; then
@@ -294,7 +303,10 @@ while true; do
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+  4))" "Reserved for processor architecture-unique data" "${ProcessorArchitectureUniqueData}"
 		fi
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+ 24))" "Pointer to start of PCI Data Structure" "${PointerPCIDataStructure}"
+
+		if [[ -n $PadBytes ]]; then
 			printf "\\        %08X: %52s: %s\n"                     "$((RomStart+ 26))" "Pad bytes" "${PadBytes}"
+		fi
 		if [[ -n $varBytes ]]; then
 			printf "\\        %8s  %52s:\n%s\n" "" "Variable length pad bytes" "${varBytes}"
 		fi
