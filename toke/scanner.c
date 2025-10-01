@@ -1063,8 +1063,8 @@ static void handle_internal(u16 tok)
 
 	case PCIDATASTRUCTURESTART:
 		pci_data_structure_start=dpoptype(kToke);
-		if(pci_data_structure_start < 0x1C) {
-			printf(FILE_POSITION "error: Start of PCI Data Structure=0x%04x is less than 0x1C\n",
+		if(pci_data_structure_start < 0x1A) {
+			printf(FILE_POSITION "error: Start of PCI Data Structure=0x%04x is less than 0x1A\n",
 					iname, lineno, pci_data_structure_start);
 			ERROR;
 		}
