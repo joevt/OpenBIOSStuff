@@ -73,8 +73,6 @@ void init_macros(void)
 {
 	add_macro( "eval",	"evaluate");
 	add_macro( "(.)", 	"dup abs <# u#s swap sign u#>");
-	add_macro( "<<", 	"lshift");
-	add_macro( ">>",	"rshift");
 	add_macro( "?",		"@ .");
 	add_macro( "1+",	"1 +");
 	add_macro( "1-",	"1 -");
