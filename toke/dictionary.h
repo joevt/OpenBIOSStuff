@@ -24,6 +24,9 @@
  *
  */
 
+#ifndef _H_DICTIONARY
+#define _H_DICTIONARY
+
 #define COLON		0x01
 #define SEMICOLON	0x02
 #define TOKENIZE	0x03
@@ -82,6 +85,9 @@
 #define BINARY		0x36
 #define INSTANCE    0x37
 #define CODE        0x38
+#define RECURSE     0x39
+#define UNDEFINED_COLON 0x3A
+
 
 #define END0		0xdb
 #define END1		0xdc
@@ -115,3 +121,18 @@
 #define FCODE_DATE	0xfd
 #define FCODE_V2	0xfe
 #define FCODE_END	0xff
+
+typedef struct token {
+	u8  *name;
+	u16 fcode;
+	u16 type;
+	struct token *next;
+} token_t;
+
+typedef struct macro {
+	u8  *name;
+	u8  *alias;
+	struct macro *next;
+} macro_t;
+
+#endif

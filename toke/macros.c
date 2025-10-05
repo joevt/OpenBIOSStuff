@@ -38,12 +38,6 @@ extern strcasecmp(const char * str1, const char * str2);
 
 #include "toke.h"
 
-typedef struct macro {
-	u8  *name;
-	u8  *alias;
-	struct macro *next;
-} macro_t;
-
 static macro_t *macros=NULL;
 
 char *lookup_macro(char *name)
@@ -57,7 +51,7 @@ char *lookup_macro(char *name)
 	return curr?(char *)curr->alias:NULL;
 }
 
-int add_macro(char *name, char *alias)
+macro_t * add_macro(char *name, char *alias)
 {
 	macro_t *curr;
 
@@ -72,7 +66,7 @@ int add_macro(char *name, char *alias)
 	curr->alias=(u8 *)alias;
 
 	macros=curr;
-	return 0;
+	return curr;
 }
 
 void init_macros(void) 

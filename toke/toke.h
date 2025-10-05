@@ -36,6 +36,8 @@
 #define FALSE (0)
 #define ANSI_ONLY
 
+#include "dictionary.h"
+
 extern void	init_scanner( void );
 extern void	exit_scanner( void );
 
@@ -47,9 +49,10 @@ extern u16	lookup_token(char *name);
 extern u16	lookup_token_type(char *name);
 extern u16	lookup_fword(char *name);
 extern char	*lookup_macro(char *name);
-extern int	add_token(u16 number, char *name);
-extern int	add_token_with_type(u16 number, char *name, u16 type);
-extern int	add_macro(char *name, char *alias);
+extern token_t * add_token(u16 number, char *name);
+extern token_t * add_token_with_type(u16 number, char *name, u16 type);
+extern macro_t * add_macro(char *name, char *alias);
 extern void pci_reset( void );
+extern void mark_defined(token_t * tok);
 
 #endif   /* _H_TOKE */
