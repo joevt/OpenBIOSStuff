@@ -175,8 +175,10 @@ void init_dictionary(void)
 	add_token_with_type( 0x024, "or", CODE );
 	add_token_with_type( 0x025, "xor", CODE );
 	add_token_with_type( 0x026, "invert", CODE );
-	add_token_with_type( 0x027, "lshift", CODE ); // aliased by <<
-	add_token_with_type( 0x028, "rshift", CODE ); // aliased by >>
+	add_token_with_type( 0x027, "<<", CODE ); // alias lshift (same fcode)
+	add_token_with_type( 0x027, "lshift", CODE );
+	add_token_with_type( 0x028, ">>", CODE ); // alias rshift (same fcode)
+	add_token_with_type( 0x028, "rshift", CODE );
 	add_token_with_type( 0x029, ">>a", CODE );
 	add_token_with_type( 0x02a, "/mod", CODE );
 	add_token_with_type( 0x02b, "u/mod", CODE );
