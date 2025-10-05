@@ -104,7 +104,8 @@ void pci_reset( void ) {
 }
 
 bool offs16=TRUE;
-static bool intok=FALSE, incolon=FALSE, in_to=FALSE, in_instance=FALSE;
+static bool intok=FALSE, in_to=FALSE, in_instance=FALSE;
+static token_t * incolon=NULL;
 bool haveend=FALSE;
 
 static u8 *skipws(u8 *str)
@@ -431,9 +432,10 @@ void exit_scanner(void)
 char *name, *alias;
 int flags=0;
 
-static int create_word(u16 tok)
+static token_t * create_word(u16 tok)
 {
 	unsigned long wlen;
+	token_t * token;
 
 	if (incolon) {
 		printf(FILE_POSITION "error: creating words not allowed "
@@ -454,7 +456,7 @@ static int create_word(u16 tok)
 	printf(FILE_POSITION "debug: defined new word %s, fcode no 0x%x\n",
 			iname, lineno, name, nextfcode);
 #endif
-	add_token_with_type(nextfcode, name, tok);
+	token = add_token_with_type(nextfcode, name, tok);
 	if (flags) {
 		if (flags&FLAG_EXTERNAL)
 			emit_token("external-token");
@@ -467,7 +469,7 @@ static int create_word(u16 tok)
 	emit_fcode(nextfcode);
 	nextfcode++;
 
-	return 0;
+	return token;
 }
 
 static void encode_file( const char *filename )
@@ -519,14 +521,19 @@ static void handle_internal(u16 tok)
 		break;
 
 	case COLON:
-		create_word(tok);
+		incolon=create_word(UNDEFINED_COLON);
 		emit_token("b(:)");
-		incolon=TRUE;
 		break;
 
 	case SEMICOLON:
 		emit_token("b(;)");
-		incolon=FALSE;
+		if (!incolon) {
+			printf(FILE_POSITION "\";\" should only be used inside a colon definition\n",
+				iname, lineno);
+		} else {
+			mark_defined(incolon);
+		}
+		incolon=NULL;
 		break;
 
 	case CREATE:
@@ -1041,6 +1048,21 @@ static void handle_internal(u16 tok)
 		break;
 
 	case RECURSIVE:
+		if (!incolon) {
+			printf(FILE_POSITION "\"recursive\" should only be used inside a colon definition\n",
+				iname, lineno);
+		} else {
+			mark_defined(incolon);
+		}
+		break;
+
+	case RECURSE:
+		if (!incolon) {
+			printf(FILE_POSITION "\"recurse\" should only be used inside a colon definition\n",
+				iname, lineno);
+		} else {
+			emit_fcode(incolon->fcode);
+		}
 		break;
 
 	case PCIHDR:

@@ -42,13 +42,6 @@ extern int strcasecmp(const char * str1, const char * str2);
 #include "toke.h"
 #include "dictionary.h"
 
-typedef struct token {
-	u8  *name;
-	u16 fcode;
-	u16 type;
-	struct token *next;
-} token_t;
-
 static token_t *dictionary=NULL;
 static token_t *forthwords=NULL;
 
@@ -57,7 +50,7 @@ static token_t *lookup_token_dict0(char *name, token_t *dict)
 	token_t *curr;
 	
 	for (curr=dict; curr!=NULL; curr=curr->next)
-		if (!strcasecmp(name,(char *)curr->name))
+		if (curr->type != UNDEFINED_COLON && !strcasecmp(name,(char *)curr->name))
 			break;
 
 	if (curr)
@@ -94,7 +87,7 @@ u16 lookup_fword(char *name)
 	return lookup_token_dict(name, forthwords);
 }
 
-static int add_token_dict(u16 number, char *name, token_t **dict, u16 type)
+token_t * add_token_dict(u16 number, char *name, token_t **dict, u16 type)
 {
 	token_t *curr;
 
@@ -110,22 +103,50 @@ static int add_token_dict(u16 number, char *name, token_t **dict, u16 type)
 	curr->name=(u8 *)name;
 
 	*dict=curr;
-	return 0;
+	return curr;
 }
 
-int add_token(u16 number, char *name)
+token_t * add_token(u16 number, char *name)
 {
 	return add_token_dict(number, name, &dictionary, 0);
 }
 
-int add_token_with_type(u16 number, char *name, u16 type)
+token_t * add_token_with_type(u16 number, char *name, u16 type)
 {
 	return add_token_dict(number, name, &dictionary, type);
 }
 
-static int add_special(u16 number, char *name)
+static token_t * add_special(u16 number, char *name)
 {
 	return add_token_dict(number, name, &forthwords, 0);
+}
+
+const char *token_type_string(token_t *tok)
+{
+	static char buff[20];
+	switch (tok->type)
+	{
+		case COLON    : return "COLON";
+		case CODE     : return "CODE";
+		case CONST    : return "CONST";
+		case VARIABLE : return "VARIABLE";
+		case DEFER    : return "DEFER";
+		case VALUE    : return "VALUE";
+		default:
+			sprintf(buff, "Unknown 0x%X", tok->type);
+			return buff;
+	}
+}
+
+void mark_defined(token_t * tok)
+{
+	if (tok->type == UNDEFINED_COLON) {
+		tok->type = COLON;
+	} else if (tok->type == COLON) {
+		printf("warning: colon word 0x%03x \"%s\" is already defined.\n", tok->fcode, tok->name);
+	} else {
+		printf("warning: word 0x%03x \"%s\" (type %s) is not a colon word.\n", tok->fcode, tok->name, token_type_string(tok));
+	}
 }
 
 void init_dictionary(void) 
@@ -573,6 +594,7 @@ void init_dictionary(void)
 	add_special(PBSTRING,	".(");
 	add_special(SSTRING,	"s\"");
 	add_special(RECURSIVE,	"recursive");
+	add_special(RECURSE,	"recurse");
 	add_special(NEXTFCODE,	"next-fcode");
 	/* version1 is also an fcode word, but it 
 	 * needs to trigger some tokenizer internals */
