@@ -46,6 +46,10 @@ typedef struct token {
 
 	#define kIgnoreToken			0x10
 	#define kFCodePredefined		0x20
+	#define kTokenFinished			0x40
+	#define kPass1					0x80
+	#define kPass2					0x100
+	#define kLoggedHidden			0x200
 
 /* globals */
 extern const char* fcerror;
@@ -53,9 +57,9 @@ extern const char* unnamed;
 extern token_t *dictionary;
 
 /* prototypes */
-token_t *find_token(u16 number);
+token_t *find_token(u16 number, bool check_name);
 const char *get_token_name(token_t *theToken);
-const char *lookup_token(u16 number);
+const char *lookup_token(u16 number, bool check_name);
 token_t *add_token(u16 number, const char *name);
 void init_dictionary(void);
 void dump_defined(void);

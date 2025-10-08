@@ -184,16 +184,80 @@ Also includes FCodes "unloop" to "set-args".
 	}
 }
 
-token_t *find_token(u16 number)
+token_t *find_token_by_name(const char *name)
 {
 	token_t *curr;
-	
+
+	if (name && *name)
+		for (curr=dictionary; curr!=NULL; curr=curr->next)
+			if ( (curr->flags & kTokenFinished) && (curr->flags & (gPass ? kPass2 : kPass1)) && !(curr->flags & kIgnoreToken) )
+				if (curr->name && !strcmp(curr->name, name))
+					return curr;
+	return NULL;
+}
+
+static token_t *conflict_token1 = NULL;
+static token_t *conflict_token2 = NULL;
+static int conflict_line = -1;
+
+token_t *find_token(u16 number, bool check_name)
+{
+	token_t *curr;
+	token_t *result_first = NULL;
+	token_t *result_nonhidden = NULL;
+	token_t *result_final;
+	bool got_conflict = FALSE;
+
 	for (curr=dictionary; curr!=NULL; curr=curr->next)
 		if (curr->fcode==number)
-		if ( ( curr->flags & kIgnoreToken ) == 0 )
-			return curr;
+			if ( ( curr->flags & kIgnoreToken ) == 0 ) {
+				if (!result_first)
+					result_first = curr;
+				if (check_name) {
+					const char *name = curr->name;
+					if (name && name != unnamed && *name) {
+						token_t *named = find_token_by_name(name);
+						if (named && named->fcode != number) {
+							if (linenum != conflict_line || named != conflict_token2 || !conflict_token1 || conflict_token1->fcode != curr->fcode || strcmp(curr->name, conflict_token1->name)) {
+								conflict_token1 = curr;
+								conflict_token2 = named;
+								conflict_line = linenum;
+								//if (!(curr->flags & kLoggedHidden)) {
+									fprintf(stderr, "Line %d # Token 0x%03x \"%s\" is hidden by later token 0x%03x \"%s\"\n", linenum,
+										curr->fcode, curr->name, named->fcode, named->name);
+									curr->flags |= kLoggedHidden;
+								//}
+								got_conflict = TRUE;
+							}
+							continue;
+						}
+					}
+				}
+				result_nonhidden = curr;
+				break;
+			}
 
-	return NULL;
+	if (got_conflict) {
+		if (result_nonhidden) {
+			if (result_nonhidden->flags & kFCodePredefined) {
+				result_final = result_nonhidden;
+				fprintf(stderr, "Line %d # Problem resolved by using older predefined token: 0x%03x \"%s\"\n",
+					linenum, result_final->fcode, result_final->name);
+			} else {
+				result_final = result_first;
+				fprintf(stderr, "Line %d # Problem could be resolved using older token: 0x%03x \"%s\" but it might not be correct so we'll use latest token: 0x%03x \"%s\"\n",
+					linenum, result_nonhidden->fcode, result_nonhidden->name, result_final->fcode, result_final->name);
+			}
+		} else {
+			result_final = result_first;
+			fprintf(stderr, "Line %d # Problem not resolved; using latest token: 0x%03x \"%s\"\n",
+				linenum, result_final->fcode, result_final->name);
+		}
+	} else {
+		result_final = result_first;
+	}
+
+	return result_final;
 }
 
 const char *get_token_name(token_t *theToken)
@@ -204,16 +268,16 @@ const char *get_token_name(token_t *theToken)
 	return fcerror;
 }
 
-const char *lookup_token(u16 number)
+const char *lookup_token(u16 number, bool check_name)
 {
-	token_t *curr = find_token( number );
+	token_t *curr = find_token( number, check_name );
 	return get_token_name( curr );
 }
 
 token_t *add_token(u16 number, const char *name)
 {
 /* get token and name */
-	token_t *curr = find_token(number);
+	token_t *curr = find_token(number, false);
 	const char* oldname = get_token_name(curr);
 
 	const char* token_type_string;
@@ -341,7 +405,14 @@ token_t *add_token(u16 number, const char *name)
 			}
 			else
 			{
-				fprintf(stderr, "Line %d # Renamed %s%stoken 0x%03x from \"%s\" to \"%s\"\n", linenum, token_flags_string, token_type_string, number, oldname, name);
+				if (!dictionaryIntialized) {
+					fprintf(stderr, "Line %d # Adding alias for %s%stoken 0x%03x \"%s\" -> \"%s\"\n", linenum, token_flags_string, token_type_string, number, oldname, name);
+					message_string = NULL;
+				}
+				else
+				{
+					fprintf(stderr, "Line %d # Renamed %s%stoken 0x%03x from \"%s\" to \"%s\"\n", linenum, token_flags_string, token_type_string, number, oldname, name);
+				}
 				make_new_token = TRUE;
 			}
 		}
@@ -374,8 +445,7 @@ token_t *add_token(u16 number, const char *name)
 		dictionary = curr;
 	}
 
-	curr->flags = new_flags;
-
+	curr->flags = new_flags | kTokenFinished | (gPass ? kPass2 : kPass1);
 	return curr;
 }
 
@@ -437,7 +507,9 @@ void init_dictionary(void)
 	add_token( 0x024, "or" );
 	add_token( 0x025, "xor" );
 	add_token( 0x026, "invert" );
+	add_token( 0x027, "<<" ); // alias lshift
 	add_token( 0x027, "lshift" );
+	add_token( 0x028, ">>" ); // alias rshift
 	add_token( 0x028, "rshift" );
 	add_token( 0x029, ">>a" );
 	add_token( 0x02a, "/mod" );
@@ -1013,7 +1085,7 @@ static void dump_one_token_as_undefined( u16 fcodeNumber )
 {
 	token_t * theToken;
 
-	theToken = find_token( fcodeNumber );
+	theToken = find_token( fcodeNumber, false );
 	if (theToken == NULL )
 		fprintf(stderr, "# Undefined 0x%03x\n", fcodeNumber );
 	else if ( (theToken->flags & kFCodeDefined) == 0 )

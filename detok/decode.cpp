@@ -226,10 +226,18 @@ static void output_token_of(bool of)
 	if ( gPass )
 	{
 		const char * tname = NULL;
-		token_t *theToken = find_token( fcode );
+		token_t *theToken = find_token( fcode, of );
 		if (theToken) {
 			if (of) tname = theToken->ofname;
 			if (!tname) tname = theToken->name;
+			if (!(theToken->flags & kTokenFinished)) {
+				if (dictionary == theToken) {
+					tname = "recurse";
+				} else {
+					fprintf( stderr, "Line %d # Unfinished token 0x%03x \"%s\" is not the latest token 0x%03x \"%s\"",
+						linenum, theToken->fcode, theToken->name, dictionary->fcode, dictionary->name);
+				}
+			}
 		}
 		if (!tname) tname = fcerror;
 
@@ -575,6 +583,8 @@ static void decode_token(u16 token_to_decode)
 				switch (token_to_decode)
 				{
 					case 0x0c2: /* b(;) */
+						dictionary->flags |= kTokenFinished;
+						/* fallthru */
 					case 0x0c5: /* b(endcase) */
 						{
 							int theindent = (int)dpoptype(token_to_decode == 0xc2 ? 0x0b7 : 0x0c5);
@@ -646,6 +656,8 @@ static void decode_token(u16 token_to_decode)
 						indent++;
 						break;
 					case 0x0b7: /* b(:) */
+						dictionary->flags &= ~kTokenFinished;
+						/* fallthru */
 					case 0x0c4: /* b(case) */
 						decode_default();
 						indent++;
@@ -752,10 +764,10 @@ thedefault:
 	if ( gPass )
 	{
 		if ( (current_token_record->flags & kFCodeTypeMask) == kFCodeHistorical )
-			fprintf(stderr, "Line %d # Historical or non-implemented FCode: \"%s\" [0x%03x]\n", linenum, lookup_token(token_to_decode), token_to_decode);
+			fprintf(stderr, "Line %d # Historical or non-implemented FCode: \"%s\" [0x%03x]\n", linenum, lookup_token(token_to_decode, false), token_to_decode);
 
 		if ( (current_token_record->flags & kFCodeTypeMask) == kFCodeNew )
-			fprintf(stderr, "Line %d # New FCode: \"%s\" [0x%03x]\n", linenum, lookup_token(token_to_decode), token_to_decode);
+			fprintf(stderr, "Line %d # New FCode: \"%s\" [0x%03x]\n", linenum, lookup_token(token_to_decode, false), token_to_decode);
 	}
 }
 
@@ -810,7 +822,7 @@ int detokenize(void)
 				current_token_pos = get_streampos();
 
 				current_token_fcode = get_a_token();
-				current_token_record = find_token( current_token_fcode );
+				current_token_record = find_token( current_token_fcode, false );
 				current_token_name = get_token_name( current_token_record );
 				decode_token(current_token_fcode);
 
