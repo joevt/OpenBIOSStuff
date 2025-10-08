@@ -2635,7 +2635,7 @@ set-token
 			if ( ( mac_rom_fcode_flags & tokenFlagNoHeader ) == 0 )
 				fprintf(stderr, "Line %d # Bad %s token name (len:%d): \"%s\"\n", linenum, current_token_name, len, stringFromFile);
 
-			theToken = find_token(definedFCodeNumber);
+			theToken = find_token(definedFCodeNumber, false);
 			oldname = get_token_name(theToken);
 
 			if ( theToken == NULL || oldname == unnamed || definedFCodeNumber >= 0x600 )
