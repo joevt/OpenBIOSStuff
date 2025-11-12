@@ -110,18 +110,19 @@ DumpMacRomDoErrors () {
 #	mac_rom & 0x200			0x000 start of fcode image			decode_rom_token203
 #	mac_rom & 0x4FC			0x000 start of fcode image			decode_rom_token3
 #
-#	mac_rom & 4             0x0f8 code<<< >>> 					decode_s
+#	mac_rom & 4				0x0f8 code<<< >>> 					decode_s
 #	mac_rom != 0			0x3fe lb?branch, 0x3ff lbbranch		decode_branch(long)
-#	mac_rom & 0x901         0x401 b(pushlocals)					local_variables_declaration
-#	(mac_rom & 0x901) == 0  0x407 b(pushlocals), 0x408..0x40F
+#	mac_rom & 0x901			0x401 b(pushlocals)					local_variables_declaration
+#	(mac_rom & 0x901) == 0	0x407 b(pushlocals), 0x408..0x40F
 #
-#	mac_rom & 0x100			unnamed tokens 0x431 to 0x44F
-#	(mac_rom & 0x801) == 1	unnamed tokens 0x432 to 0x454
-#	mac_rom & 0x10			unnamed tokens 0x43D to 0x45F
-#	mac_rom & 0x200			unnamed tokens 0x43E to 0x461
-#	mac_rom & 0x400			unnamed tokens 0x43E to 0x461 (same as 0x200)
-#	mac_rom & 2				unnamed tokens 0x43F to 0x462
-#	mac_rom & 8				unnamed tokens 0x439 to 0x458 and 0x3fe, 0x3ff
+#	mac_rom & 0x100			unnamed tokens 0x430 to 0x44F
+#	(mac_rom & 0x801) == 1	unnamed tokens 0x431 to 0x454
+#	mac_rom & 0x1000		unnamed tokens 0x431 to 0x452
+#	mac_rom & 0x10			unnamed tokens 0x43C to 0x45F
+#	mac_rom & 0x200			unnamed tokens 0x43D to 0x461
+#	mac_rom & 0x400			(same as mac_rom & 0x200)
+#	mac_rom & 2				unnamed tokens 0x43E to 0x462
+#	mac_rom & 8				unnamed tokens 0x438 to 0x458 and 0x3FE, 0x3FF
 #	mac_rom & 0x24			tokens are named
 #
 #	(mac_rom & 0x24) == 0	fcode number cannot be > 0xFFF

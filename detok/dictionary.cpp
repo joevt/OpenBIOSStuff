@@ -975,7 +975,27 @@ void init_dictionary(void)
 		add_token( 0x441, "{'}" );
 		add_token( 0x454, "b<\">" );
 	}
-	
+
+	if (mac_rom & 0x1000)
+	{
+/* Open Firmware CHRP 1.1B3; compiled fcode tokens */
+		add_token( 0x431, "(gdoes)" );
+		add_token( 0x432, "(val)" );
+		add_token( 0x433, "(i-val)" );
+		add_token( 0x434, "b<to>" );
+		add_token( 0x435, "b<to>1" );
+		add_token( 0x436, "(i-to)" );
+		add_token( 0x437, "(var)" );
+		add_token( 0x438, "(i-var)" );
+		add_token( 0x43C, "(defer)" );
+		add_token( 0x43D, "(i-defer)" );
+		add_token( 0x43E, "(field)" );
+		add_token( 0x43F, "b<lit>" );
+		add_token( 0x440, "b<'>" );
+		add_token( 0x441, "{'}" );
+		add_token( 0x452, "b<\">" );
+	}
+
 	else if (mac_rom & 0x10)
 	{
 /* Open Firmware 2.0; Power Mac 5400 compiled fcode tokens */

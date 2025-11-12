@@ -746,7 +746,7 @@ thedefault:
 							// for doing bytes between rom images of Open Firmware 1.1.22
 							decode_rom_token1122();
 						}
-						if ( mac_rom & 0x200 ) {
+						if ( (mac_rom & 0x200) || (mac_rom & 0x1000) ) {
 							// for doing bytes between rom images of Open Firmware 2.0.3
 							decode_rom_token203();
 						}
