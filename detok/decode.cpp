@@ -493,7 +493,7 @@ static void decode_start(void)
 			for (i=0; i < numCheckSumBytes; i++)
 				checksum+=get_num8();
 
-			if (current_token_pos==0 || fcchecksum==checksum)
+			if (current_token_pos==0 || fcchecksum==checksum || fcformat==8)
 			{
 				fclen=newEndPos;
 				indent=0;
