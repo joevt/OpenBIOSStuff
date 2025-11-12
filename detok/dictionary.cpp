@@ -939,6 +939,7 @@ void init_dictionary(void)
 	if (mac_rom & 0x100)
 	{
 /* Open Firmware 0.992j; TNT Development compiled fcode tokens */
+		add_token( 0x430, "(gdoes)" );
 		add_token( 0x431, "(val)" );
 		add_token( 0x432, "(i-val)" );
 		add_token( 0x433, "b<to>" );
@@ -958,6 +959,7 @@ void init_dictionary(void)
 	if ((mac_rom & 0x801) == 1)
 	{
 /* Open Firmware 1.0.5; Power Mac 7500, 9500, 8600, etc. compiled fcode tokens */
+		add_token( 0x431, "(gdoes)" );
 		add_token( 0x432, "(val)" );
 		add_token( 0x433, "(i-val)" );
 		add_token( 0x434, "b<to>" );
@@ -977,6 +979,7 @@ void init_dictionary(void)
 	else if (mac_rom & 0x10)
 	{
 /* Open Firmware 2.0; Power Mac 5400 compiled fcode tokens */
+		add_token( 0x43C, "(gdoes)" );
 		add_token( 0x43D, "(val)" );
 		add_token( 0x43E, "(i-val)" );
 		add_token( 0x43F, "b<to>" );
@@ -993,28 +996,15 @@ void init_dictionary(void)
 		add_token( 0x45F, "b<\">" );
 	}
 
-	else if (mac_rom & 0x200)
-	{
+	else if (
+		(mac_rom & 0x200)
 /* Open Firmware 2.0.3; Power Mac 6500 compiled fcode tokens */
-		add_token( 0x43E, "(val)" );
-		add_token( 0x43F, "(i-val)" );
-		add_token( 0x440, "b<to>" );
-		add_token( 0x441, "b<to>1" );
-		add_token( 0x442, "(i-to)" );
-		add_token( 0x443, "(var)" );
-		add_token( 0x444, "(i-var)" );
-		add_token( 0x448, "(defer)" );
-		add_token( 0x449, "(i-defer)" );
-		add_token( 0x44A, "(field)" );
-		add_token( 0x44B, "b<lit>" );
-		add_token( 0x44C, "b<'>" );
-		add_token( 0x44D, "{'}" );
-		add_token( 0x461, "b<\">" );
-	}
-
-	else if (mac_rom & 0x400)
-	{
+		||
+		(mac_rom & 0x400)
 /* Open Firmware 2.0.1; Power Book 3400 compiled fcode tokens, but not Kanga or Wallstreet */
+	)
+	{
+		add_token( 0x43D, "(gdoes)" );
 		add_token( 0x43E, "(val)" );
 		add_token( 0x43F, "(i-val)" );
 		add_token( 0x440, "b<to>" );
@@ -1034,6 +1024,7 @@ void init_dictionary(void)
 	else if (mac_rom & 2)
 	{
 /* Open Firmware 2.0f1 and 2.4; Power Mac G3 ROM compiled fcode tokens */
+		add_token( 0x43E, "(gdoes)" );
 		add_token( 0x43F, "(val)" );
 		add_token( 0x440, "(i-val)" );
 		add_token( 0x441, "b<to>" );
@@ -1053,9 +1044,10 @@ void init_dictionary(void)
 	if (mac_rom & 8)
 	{
 /* Open Firmware 3; B&W G3 ROM compiled fcode tokens */
-		add_token( 0x3fe, "lb?branch" );
-		add_token( 0x3ff, "lbbranch" );
+		add_token( 0X3FE, "lb?branch" );
+		add_token( 0X3FF, "lbbranch" );
 
+		add_token( 0x438, "(gdoes)" );
 		add_token( 0x439, "(val)" );
 		add_token( 0x43A, "(i-val)" );
 		add_token( 0x43B, "b<to>" );
