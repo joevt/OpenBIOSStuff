@@ -532,8 +532,79 @@ static void handle_internal(u16 tok)
 				iname, lineno);
 		} else {
 			mark_defined(incolon);
+			reset_locals();
 		}
 		incolon=NULL;
+		break;
+
+	case ASSIGN:
+		if (!incolon) {
+			printf(FILE_POSITION "\"{\" should only be used inside a colon definition\n",
+				iname, lineno);
+		} else {
+			get_word();
+			u16 tok = lookup_token((char *)statbuf);
+			if (tok == 0xffff) {
+				printf(FILE_POSITION "error: no such word '%s' in ->\n",
+						iname, lineno, statbuf);
+				ERROR;
+			}
+			u16 typ = lookup_token_type((char *)statbuf);
+			if (typ != LOCAL) {
+				printf(FILE_POSITION "error: expected word '%s' to be a local in ->\n",
+						iname, lineno, statbuf);
+				ERROR;
+			}
+			emit_fcode(0x418 + tok - 0x410);
+		}
+		break;
+
+	case PARAMS:
+		if (!incolon) {
+			printf(FILE_POSITION "\"{\" should only be used inside a colon definition\n",
+				iname, lineno);
+		} else {
+			int numparams = 0;
+			int numlocals = 0;
+			bool onlocals = FALSE;
+			while (1) {
+				get_word();
+				if (!strcmp((char *)statbuf, ";")) {
+					if (onlocals) {
+						printf(FILE_POSITION "\";\" should only be used once\n",
+							iname, lineno);
+					} else {
+						onlocals = TRUE;
+						numparams = numlocals;
+					}
+				} else if (!strcmp((char *)statbuf, "}")) {
+					if (!onlocals) {
+						onlocals = TRUE;
+						numparams = numlocals;
+					}
+					if (mac_rom == 1) {
+						emit_fcode(0x401);
+						emit_byte(numparams);
+					} else {
+						emit_fcode(0x407 + numparams);
+					}
+					break;
+				} else {
+					if (numlocals >= 8) {
+						printf(FILE_POSITION "too many locals\n",
+							iname, lineno);
+					} else if (!strcmp((char *)statbuf, "...")) {
+						char buf[20];
+						while (numlocals < 8) {
+							snprintf(buf, sizeof(buf), "local_%d", numlocals);
+							set_local(numlocals++, strdup(buf));
+						}
+					} else {
+						set_local(numlocals++, strdup((char *)statbuf));
+					}
+				}
+			}
+		}
 		break;
 
 	case CREATE:
@@ -899,7 +970,7 @@ static void handle_internal(u16 tok)
 			base=0x10;
 			get_word();
 			if (!get_number(&val)) {
-				emit_num(val);
+				emit_num((u32)val);
 			} else {
 				printf(FILE_POSITION "warning: illegal value in h#"
 						" ignored\n", iname, lineno);
@@ -916,7 +987,7 @@ static void handle_internal(u16 tok)
 			base=0x0a;
 			get_word();
 			if (!get_number(&val)) {
-				emit_num(val);
+				emit_num((u32)val);
 			} else {
 				printf(FILE_POSITION "warning: illegal value in d#"
 						" ignored\n", iname, lineno);
@@ -934,7 +1005,7 @@ static void handle_internal(u16 tok)
 			base=0x08;
 			get_word();
 			if (!get_number(&val)) {
-				emit_num(val);
+				emit_num((u32)val);
 			} else {
 				printf(FILE_POSITION "warning: illegal value in o#"
 						" ignored\n", iname, lineno);
@@ -952,7 +1023,7 @@ static void handle_internal(u16 tok)
 			base=0x02;
 			get_word();
 			if (!get_number(&val)) {
-				emit_num(val);
+				emit_num((u32)val);
 			} else {
 				printf(FILE_POSITION "warning: illegal value in b#"
 						" ignored\n", iname, lineno);
@@ -1067,7 +1138,7 @@ static void handle_internal(u16 tok)
 
 	case PCIHDR:
 		{
-			u32 classid=dpoptype(kToke);
+			u32 classid=(u32)dpoptype(kToke);
 			u16 did=dpoptype(kToke);
 			u16 vid=dpoptype(kToke);
 
@@ -1156,7 +1227,7 @@ static void handle_internal(u16 tok)
 		break;
 
 	case ROMSIZE:
-		rom_size=dpoptype(kToke);
+		rom_size=(u32)dpoptype(kToke);
 		printf(FILE_POSITION "Rom Size=0x%08x\n",
 				iname, lineno, rom_size);
 		break;
@@ -1339,29 +1410,6 @@ void tokenize(void)
 			continue;
 		}
 
-		/* Check whether a macro with given name exists */
-
-		mac=lookup_macro((char *)statbuf);
-		if(mac) {
-			u8 *oldstart, *oldpc, *oldend;
-#if DEBUG_SCANNER
-			printf(FILE_POSITION "debug: macro %s folds out to sequence"
-				" '%s'\n", iname, lineno, (char *)statbuf, mac);
-#endif
-			validate_to_target(0);
-			validate_instance(0);
-
-			oldstart=start; oldpc=pc; oldend=end;
-			start=pc=end=(u8*)mac;
-			end+=strlen(mac);
-
-			tokenize();
-
-			end=oldend; pc=oldpc; start=oldstart;
-
-			continue;
-		}
-
 		/* Check whether it's a non-fcode forth construct */
 
 		tok=lookup_fword((char *)statbuf);
@@ -1398,6 +1446,29 @@ void tokenize(void)
 			continue;
 		}
 
+		/* Check whether a macro with given name exists */
+
+		mac=lookup_macro((char *)statbuf);
+		if(mac) {
+			u8 *oldstart, *oldpc, *oldend;
+#if DEBUG_SCANNER
+			printf(FILE_POSITION "debug: macro %s folds out to sequence"
+				" '%s'\n", iname, lineno, (char *)statbuf, mac);
+#endif
+			validate_to_target(0);
+			validate_instance(0);
+
+			oldstart=start; oldpc=pc; oldend=end;
+			start=pc=end=(u8*)mac;
+			end+=strlen(mac);
+
+			tokenize();
+
+			end=oldend; pc=oldpc; start=oldstart;
+
+			continue;
+		}
+
 		/* It's not a word or macro - is it a number? */
 
 		if (!get_number(&val)) {
@@ -1406,7 +1477,7 @@ void tokenize(void)
 			else {
 				validate_to_target(0);
 				validate_instance(0);
-				emit_num(val);
+				emit_num((u32)val);
 			}
 			continue;
 		}

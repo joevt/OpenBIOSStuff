@@ -51,6 +51,7 @@
 int verbose=0;
 int noerrors=0;
 int lowercase=0;
+int mac_rom=0;
 
 int gGotError=0;
 
@@ -77,6 +78,7 @@ static void usage(char *name)
 			"         -v, --verbose          print fcode numbers\n"
 			"         -a, --ignore-errors    ignore errors\n"
 			"         -l, --lowercase        convert all names to lower case\n"
+			"         -m, --macrom           support Mac Open Firmware words\n"
 			"         -h, --help             print this help text\n\n", name);
 		printedusage = 1;
 	}
@@ -85,7 +87,7 @@ static void usage(char *name)
 int main(int argc, char **argv)
 {
 	pci_reset();
-	const char *optstring="vhilo:?";
+	const char *optstring="vhilo:?m:";
 	char *outputname = NULL;
 	int c;
 
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
 			{ "ignore-errors", 0, 0, 'i' },
 			{ "help", 0, 0, 'h' },
 			{ "lowercase", 0, 0, 'l' },
+			{ "macrom", 0, 0, 'm' },
 			{ 0, 0, 0, 0 }
 		};
 
@@ -130,12 +133,23 @@ int main(int argc, char **argv)
 			case 'l':
 				lowercase=1;
 				break;
+			case 'm':
+				if (optarg==NULL || optarg[0]==0)
+					mac_rom = 2;
+				else
+				{
+					mac_rom=atoi( optarg );
+					if (mac_rom < 1)
+						goto badoption;
+				}
+				break;
 			case 'h':
 			case '?':
 				print_copyright();
 				usage(argv[0]);
 				return 0;		
 			default:
+badoption:
 				print_copyright();
 				printf ("%s: unknown options.\n",argv[0]);
 				usage(argv[0]);

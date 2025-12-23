@@ -71,14 +71,14 @@ u16 lookup_token(char *name);
 int emit_byte(u8 data)
 {
 	u8 *newout;
-	int newsize;
+	long newsize;
 
 	if(opc==oend) {
 		/* need more output space */
 		newsize = (oend - ostart) * 2;
-		printf("Increasing output buffer to %d bytes.\n", newsize);
+		printf("Increasing output buffer to %ld bytes.\n", newsize);
 		if ((newout=realloc(ostart, newsize)) == NULL) {
-			printf("toke: could not allocate %d bytes for output buffer\n", newsize);
+			printf("toke: could not allocate %ld bytes for output buffer\n", newsize);
 			exit(-1);
 		}
 
@@ -181,7 +181,7 @@ s16 receive_offset(void)
 	return offs;
 }
 
-int emit_string(u8 *string, unsigned int cnt)
+int emit_string(u8 *string, size_t cnt)
 {
 	unsigned int i=0;
 	
@@ -231,7 +231,7 @@ int finish_fcodehdr(void)
 	if (!haveend)
 		emit_token("end0");
 
-	len=(unsigned long)opc-(unsigned long)(fcode_hdr-1);
+	len=(u32)((size_t)opc-(size_t)(fcode_hdr-1));
 	
 	for (i=8;i<len;i++)
 		checksum+=fcode_hdr[i-1];
@@ -305,7 +305,7 @@ int emit_pcihdr(u16 vid, u16 did, u32 classid)
 int finish_pcihdr(void)
 {
 	u8 *tpc;
-	u32 imgsize=opc-ostart, imgblocks;
+	u32 imgsize=(u32)(opc-ostart), imgblocks;
 	int padding;
 	
 	if(!pci_hdr)
@@ -359,7 +359,7 @@ void finish_headers(void)
 	while (dstackfindtype(kFCodeHeader)) finish_fcodehdr();
 	if (pci_hdr) finish_pcihdr();
 	if (rom_size) {
-		int padding = rom_size-(opc-ostart);
+		int padding = rom_size-(u32)(opc-ostart);
 		if (padding<0)
 			printf("warning: rom size has been exceeded\n");
 		else

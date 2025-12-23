@@ -44,6 +44,7 @@ extern int strcasecmp(const char * str1, const char * str2);
 
 static token_t *dictionary=NULL;
 static token_t *forthwords=NULL;
+static token_t *locals[8] = {0};
 
 static token_t *lookup_token_dict0(char *name, token_t *dict)
 {
@@ -97,13 +98,34 @@ token_t * add_token_dict(u16 number, char *name, token_t **dict, u16 type)
 		exit(-ENOMEM);
 	}
 
+	curr->prev=NULL;
 	curr->next=*dict;
 	curr->fcode=number;
 	curr->type=type;
-	curr->name=(u8 *)name;
+	curr->name=name;
+
+	if (*dict) {
+		(*dict)->prev = curr;
+	}
 
 	*dict=curr;
 	return curr;
+}
+
+void move_token_to_end(token_t *tok, token_t **dict)
+{
+	if (tok && tok->prev) {
+		tok->prev->next = tok->next;
+
+		if (tok->next)
+			tok->next->prev = tok->prev;
+
+		tok->prev = NULL;
+		tok->next = *dict;
+
+		(*dict)->prev = tok;
+		*dict = tok;
+	}
 }
 
 token_t * add_token(u16 number, char *name)
@@ -641,4 +663,33 @@ void init_dictionary(void)
 	add_special(VPDOFFSET,	"set-vpd-offset");
 	add_special(ROMSIZE,	"rom-size");
 	add_special(PCIENTRY, "pci-entry");
+
+	if (mac_rom) {
+		add_special(PARAMS, "{" );
+		add_special(ASSIGN, "->" );
+		locals[0] = add_token_with_type( 0x410, "", LOCAL );
+		locals[1] = add_token_with_type( 0x411, "", LOCAL );
+		locals[2] = add_token_with_type( 0x412, "", LOCAL );
+		locals[3] = add_token_with_type( 0x413, "", LOCAL );
+		locals[4] = add_token_with_type( 0x414, "", LOCAL );
+		locals[5] = add_token_with_type( 0x415, "", LOCAL );
+		locals[6] = add_token_with_type( 0x416, "", LOCAL );
+		locals[7] = add_token_with_type( 0x417, "", LOCAL );
+	}
+}
+
+void reset_locals(void)
+{
+	for (int i = 0; i < 8; i++)
+		set_local(i, "");
+}
+
+void set_local(int i, char* name)
+{
+	if (locals[i]) {
+		if (locals[i]->name && locals[i]->name[0])
+			free(locals[i]->name);
+		locals[i]->name = name;
+		move_token_to_end(locals[i], &dictionary);
+	}
 }

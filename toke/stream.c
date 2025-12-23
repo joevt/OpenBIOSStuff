@@ -52,7 +52,7 @@ char *iname;
 /* output pointers */
 u8 *ostart, *opc, *oend;
 char *oname;
-static unsigned int ilen;
+static size_t ilen;
 
 unsigned int lineno;
 
@@ -121,7 +121,7 @@ int init_stream( const char *name)
 int init_output( const char *in_name, const char *out_name )
 {
 	const char *ext;
-	unsigned int len;
+	size_t len;
 
 	/* preparing output */
 	
@@ -162,7 +162,7 @@ int close_stream(void)
 int close_output(void)
 {
 	FILE *outfile;
-	unsigned int len;
+	size_t len;
 
 	len=(unsigned long)opc-(unsigned long)ostart;
 	
@@ -177,7 +177,7 @@ int close_output(void)
 
 	fclose(outfile);
 
-	printf("toke: wrote %d bytes to bytecode file '%s'\n", len, oname);
+	printf("toke: wrote %d bytes to bytecode file '%s'\n", (u32)len, oname);
 	
 	free(oname);
 	return 0;

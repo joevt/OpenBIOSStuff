@@ -27,111 +27,119 @@
 #ifndef _H_DICTIONARY
 #define _H_DICTIONARY
 
-#define COLON		0x01
-#define SEMICOLON	0x02
-#define TOKENIZE	0x03
-#define AGAIN		0x04
-#define ALIAS		0x05
-#define GETTOKEN 	0x06
-#define ASCII		0x07
-#define BEGIN		0x08
-#define BUFFER		0x09
-#define CASE		0x0a
-#define CONST		0x0b
-#define CONTROL		0x0c
-#define CREATE		0x0d
-#define DECIMAL		0x0e
-#define DEFER		0x0f
-#define CDO			0x10
-#define DO			0x11
-#define ELSE		0x12
-#define ENDCASE		0x13
-#define ENDOF		0x14
-#define EXTERNAL	0x15
-#define FIELD		0x16
-#define HEADERLESS	0x17
-#define HEADERS		0x18
-#define HEX			0x19
-#define IF			0x1a
+extern int mac_rom;
+
+enum FWORD {
+	COLON = 1,
+	SEMICOLON,
+	TOKENIZE,
+	AGAIN,
+	ALIAS,
+	GETTOKEN,
+	ASCII,
+	BEGIN,
+	BUFFER,
+	CASE,
+	CONST,
+	CONTROL,
+	CREATE,
+	DECIMAL,
+	DEFER,
+	CDO,
+	DO,
+	ELSE,
+	ENDCASE,
+	ENDOF,
+	EXTERNAL,
+	FIELD,
+	HEADERLESS,
+	HEADERS,
+	HEX,
+	IF,
 /* This is wrong and has been changed to a macro.
-#define CLEAVE		0x1b
+	CLEAVE,
 */
-#define LEAVE		0x1c
-#define CLOOP		0x1d
-#define LOOP		0x1e
-#define OCTAL		0x1f
-#define OF			0x20
-#define REPEAT		0x21
-#define THEN		0x22
-#define TO			0x23
-#define UNTIL		0x24
-#define VALUE		0x25
-#define VARIABLE	0x26	
-#define WHILE		0x27
-#define OFFSET16	0x28	
-#define BEGINTOK	0x29	
-#define EMITBYTE	0x2a	
-#define ENDTOK		0x2b
-#define FLOAD		0x2c
-#define STRING		0x2d
-#define PSTRING		0x2e
-#define PBSTRING	0x2f
-#define SSTRING		0x30
-#define RECURSIVE	0x31
-#define HEXVAL		0x32
-#define DECVAL		0x33
-#define OCTVAL		0x34
-#define BINVAL		0x35
-#define BINARY		0x36
-#define INSTANCE    0x37
-#define CODE        0x38
-#define RECURSE     0x39
-#define UNDEFINED_COLON 0x3A
+	LEAVE,
+	CLOOP,
+	LOOP,
+	OCTAL,
+	OF,
+	REPEAT,
+	THEN,
+	TO,
+	UNTIL,
+	VALUE,
+	VARIABLE,
+	WHILE,
+	OFFSET16,
+	BEGINTOK,
+	EMITBYTE,
+	ENDTOK,
+	FLOAD,
+	STRING,
+	PSTRING,
+	PBSTRING,
+	SSTRING,
+	RECURSIVE,
+	HEXVAL,
+	DECVAL,
+	OCTVAL,
+	BINVAL,
+	BINARY,
+	INSTANCE,
+	CODE,
+	RECURSE,
+	UNDEFINED_COLON,
 
+	END0,
+	END1,
+	CHAR,
+	CCHAR,
+	ABORTTXT,
 
-#define END0		0xdb
-#define END1		0xdc
-#define CHAR		0xdd
-#define CCHAR		0xde
-#define ABORTTXT	0xdf
+	VPDOFFSET,
+	PCIARCH,
+	PCIDATASTRUCTURESTART,
+	PCIDATASTRUCTURELENGTH,
+	ROMSIZE,
+	PCIENTRY,
 
-#define VPDOFFSET				0xe0
-#define PCIARCH					0xe1
-#define PCIDATASTRUCTURESTART	0xe2
-#define PCIDATASTRUCTURELENGTH	0xe3
-#define ROMSIZE					0xe4
-#define PCIENTRY				0xe5
+	NEXTFCODE,
 
-#define NEXTFCODE	0xef
+	ENCODEFILE,
 
-#define ENCODEFILE	0xf0
+	FCODE_V1,
+	FCODE_V3,
+	NOTLAST,
+	PCIREV,
+	PCIHDR,
+	PCIEND,
+	START0,
+	START1,
+	START2,
+	START4,
+	VERSION1,
+	FCODE_TIME,
+	FCODE_DATE,
+	FCODE_V2,
+	FCODE_END,
 
-#define FCODE_V1	0xf1
-#define FCODE_V3	0xf2
-#define NOTLAST		0xf3
-#define PCIREV		0xf4
-#define PCIHDR		0xf5
-#define PCIEND		0xf6
-#define START0		0xf7
-#define START1		0xf8
-#define START2		0xf9
-#define START4		0xfa
-#define VERSION1	0xfb
-#define FCODE_TIME	0xfc
-#define FCODE_DATE	0xfd
-#define FCODE_V2	0xfe
-#define FCODE_END	0xff
+	PARAMS,
+	ASSIGN,
+	LOCAL,
+};
 
 typedef struct token {
-	u8  *name;
+	char  *name;
 	u16 fcode;
 	u16 type;
 	struct token *next;
+	struct token *prev;
 } token_t;
 
 typedef struct macro {
-	u8  *name;
-	u8  *alias;
+	char  *name;
+	char  *alias;
 	struct macro *next;
 } macro_t;
 

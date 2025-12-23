@@ -55,4 +55,7 @@ extern macro_t * add_macro(char *name, char *alias);
 extern void pci_reset( void );
 extern void mark_defined(token_t * tok);
 
+extern void reset_locals(void);
+extern void set_local(int i, char* name);
+
 #endif   /* _H_TOKE */

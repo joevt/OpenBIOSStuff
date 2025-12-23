@@ -62,8 +62,8 @@ macro_t * add_macro(char *name, char *alias)
 	}
 
 	curr->next=macros;
-	curr->name=(u8 *)name;
-	curr->alias=(u8 *)alias;
+	curr->name=name;
+	curr->alias=alias;
 
 	macros=curr;
 	return curr;

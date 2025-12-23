@@ -50,7 +50,7 @@ int emit_num16(u16 num);
 int emit_offset(long offs);
 int emit_num(u32 num);
 s16 receive_offset(void);
-int emit_string(u8 *string, unsigned int cnt);
+int emit_string(u8 *string, size_t cnt);
 int emit_fcodehdr(void);
 int finish_fcodehdr(void);
 int emit_pcihdr(u16 vid, u16 did, u32 classid);
