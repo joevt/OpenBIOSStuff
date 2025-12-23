@@ -19,6 +19,7 @@ listparts=0
 dumppciheader=1
 detokoption1=""
 detokoption2=""
+detokoption3=""
 while ((1)); do
 	if [[ $1 == "-a" ]]; then
 		detokoption1="-a"
@@ -27,6 +28,12 @@ while ((1)); do
 	fi
 	if [[ $1 == "-v" ]]; then
 		detokoption2="-v"
+		shift
+		continue
+	fi
+	if [[ $1 == "-m" ]]; then
+		shift
+		detokoption3="-m $((${1}))"
 		shift
 		continue
 	fi
@@ -435,8 +442,8 @@ while true; do
 
 			if [[ "${codeTypeString}" == "Open Firmware" ]] ; then
 				didDetok=1
-				echo detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" ">" "${sourceFCode}.of" "2>>" "${detokErrors}" >> "${detokErrors}"
-				detok -t ${detokoption1} ${detokoption2} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
+				echo detok -t ${detokoption1} ${detokoption2} ${detokoption3} "${sourceFCode}" ">" "${sourceFCode}.of" "2>>" "${detokErrors}" >> "${detokErrors}"
+				detok -t ${detokoption1} ${detokoption2} ${detokoption3} "${sourceFCode}" > "${sourceFCode}.of" 2>> "${detokErrors}"
 
 				detok -t -n -o -v "${sourceFCode}" > "${sourceFCode}2.of" 2>> "/${TempFolder}/detokErrors2.txt"
 

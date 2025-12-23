@@ -814,7 +814,7 @@ int detokenize(void)
 		set_streampos(0);
 
 		do {
-			got_start = !(mac_rom != 0);
+			got_start = ((mac_rom == 0) || (mac_rom & 0x2000));
 
 			do {
 				if (got_start)
@@ -852,7 +852,7 @@ int detokenize(void)
 		} while (ignore_len && (get_streampos() < filelen) );
 	}
 
-	if (mac_rom)
+	if (mac_rom && !(mac_rom & 0x2000))
 		dump_defined();
 
 	return 0;

@@ -46,7 +46,7 @@ while ((1)); do
 		shift
 	elif [[ "${1}" == "-m" ]]; then
 		shift
-		macrom="${1}"
+		macrom="$((${1}))"
 		shift
 	else
 		break
@@ -130,7 +130,7 @@ DumpMacRomDoErrors () {
 #	any values				fcode number cannot be > 0 and < 0x10
 #	mac_rom & 4				0x0f4 16 bit fcode number
 
-	# detok
+#   mac_rom & 0x2000        Not a Mac ROM but an fcode image with locals.
 
 	if [[ -z $macrom ]]; then
 
