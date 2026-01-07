@@ -72,7 +72,7 @@ macro_t * add_macro(char *name, char *alias)
 void init_macros(void) 
 {
 	add_macro( "eval",	"evaluate");
-	add_macro( "(.)", 	"dup abs <# u#s swap sign u#>");
+	add_macro( "(.)", 	"dup abs <# u#s swap sign u#" ">");
 	add_macro( "?",		"@ .");
 	add_macro( "1+",	"1 +");
 	add_macro( "1-",	"1 -");
@@ -101,7 +101,7 @@ void init_macros(void)
 	add_macro( "spaces",	"0 max 0 ?do space loop");
 	add_macro( "struct",	"0");
 	add_macro( "true",	"-1");
-	add_macro( "(u.)",	"<# u#s u#>");
+	add_macro( "(u.)",	"<# u#s u#" ">");
 
 	/* H.7 FCode name changes */
 	add_macro( "decode-2int",		"parse-2int");
