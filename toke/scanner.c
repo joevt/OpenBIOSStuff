@@ -538,6 +538,25 @@ static void validate_instance(u16 type)
 	}
 }
 
+static void do_macro(char* mac)
+{
+	u8 *oldstart, *oldpc, *oldend;
+#if DEBUG_SCANNER
+	printf(FILE_POSITION "debug: macro %s folds out to sequence"
+		" '%s'\n", iname, lineno, (char *)statbuf, mac);
+#endif
+	validate_to_target(0);
+	validate_instance(0);
+
+	oldstart=start; oldpc=pc; oldend=end;
+	start=pc=end=(u8*)mac;
+	end+=strlen(mac);
+
+	tokenize();
+
+	end=oldend; pc=oldpc; start=oldstart;
+}
+
 static void handle_internal(u16 tok)
 {
 	unsigned long wlen;
@@ -1448,22 +1467,7 @@ void tokenize(void)
 
 		mac=lookup_macro((char *)statbuf);
 		if(mac) {
-			u8 *oldstart, *oldpc, *oldend;
-#if DEBUG_SCANNER
-			printf(FILE_POSITION "debug: macro %s folds out to sequence"
-				" '%s'\n", iname, lineno, (char *)statbuf, mac);
-#endif
-			validate_to_target(0);
-			validate_instance(0);
-
-			oldstart=start; oldpc=pc; oldend=end;
-			start=pc=end=(u8*)mac;
-			end+=strlen(mac);
-
-			tokenize();
-
-			end=oldend; pc=oldpc; start=oldstart;
-
+			do_macro(mac);
 			continue;
 		}
 
