@@ -980,6 +980,9 @@ static void handle_internal(u16 tok)
 			char *oldiname;
 			int oldlineno;
 
+			validate_to_target(0);
+			validate_instance(0);
+
 			get_word();
 
 			oldstart=start; oldpc=pc; oldend=end;
