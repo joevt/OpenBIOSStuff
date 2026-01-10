@@ -1372,6 +1372,16 @@ static void handle_internal(u16 tok)
 		encode_file( (char*)statbuf );
 		break;
 
+	case IMPORT: {
+		char buf[1000];
+		get_word();
+		emit_token("b(\")");
+		emit_string(statbuf,strlen((char *)statbuf));
+		snprintf(buf, sizeof(buf), "$find drop defer %s to %s", statbuf, statbuf);
+		do_macro(buf);
+		break;
+	}
+
 	default:
 		printf(FILE_POSITION "error: Unimplemented control word '%s'\n",
 				iname, lineno, statbuf);

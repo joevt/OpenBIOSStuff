@@ -645,6 +645,7 @@ void init_dictionary(void)
 	add_special(ABORTTXT,   "abort\"");
 
 	add_special(ENCODEFILE,	"encode-file");
+	add_special(IMPORT, "import");
 
 	/* pci header generation is done differently 
 	 * across the available tokenizers. We try to
