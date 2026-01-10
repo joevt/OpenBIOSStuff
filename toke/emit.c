@@ -217,7 +217,7 @@ int finish_fcodehdr(void)
 
 	u8 *fcode_hdr;
 	if (dstackfindtype(kFCodeHeader))
-		fcode_hdr = (u8 *)dpoptype(kFCodeHeader);
+		fcode_hdr = ostart + dpoptype(kFCodeHeader);
 	else
 		fcode_hdr = NULL;
 

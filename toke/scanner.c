@@ -507,7 +507,7 @@ static void handle_internal(u16 tok)
 	switch (tok) {
 	case BEGIN:
 		emit_token("b(<mark)");
-		dpushtype(kBegin, (unsigned long)opc);
+		dpushtype(kBegin, opc-ostart);
 		break;
 
 	case BUFFER:
@@ -647,7 +647,7 @@ static void handle_internal(u16 tok)
 
 	case AGAIN:
 		emit_token("bbranch");
-		offs1=dpoptype(kBegin)-(unsigned long)opc;
+		offs1=dpoptype(kBegin)-(opc-ostart);
 		emit_offset(offs1);
 		break;
 
@@ -669,29 +669,29 @@ static void handle_internal(u16 tok)
 
 	case DO:
 		emit_token("b(do)");
-		dpushtype(kDo, (unsigned long)opc);
+		dpushtype(kDo, opc-ostart);
 		emit_offset(0);
-		dpushtype(kDoOffset, (unsigned long)opc);
+		dpushtype(kDoOffset, opc-ostart);
 		break;
 
 	case CDO:
 		emit_token("b(?do)");
-		dpushtype(kDo, (unsigned long)opc);
+		dpushtype(kDo, opc-ostart);
 		emit_offset(0);
-		dpushtype(kDoOffset, (unsigned long)opc);
+		dpushtype(kDoOffset, opc-ostart);
 		break;
 
 	case ELSE:
 		offs2=dpoptype(kIf);
 		emit_token("bbranch");
-		dpushtype(kElse, (unsigned long)opc);
+		dpushtype(kElse, opc-ostart);
 		emit_offset(0);
 		emit_token("b(>resolve)");
-		offs1=(unsigned long)opc;
-		opc=(u8 *)offs2;
-		offs2=offs1-(unsigned long)opc;
+		offs1=opc-ostart;
+		opc=ostart+offs2;
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case CASE:
@@ -703,13 +703,13 @@ static void handle_internal(u16 tok)
 		/* first emit endcase, then calculate offsets. */
 		emit_token("b(endcase)");
 
-		offs1=(unsigned long)opc;
+		offs1=opc-ostart;
 
 		offs2=dpoptype(kCaseEndOf);
 		while (offs2) {
 			long tmp;
 
-			opc=(u8 *)(ostart+offs2); /* location of offset of endof offset */
+			opc=ostart+offs2; /* location of offset of endof offset */
 			tmp=receive_offset(); /* offset to location */
 
 			if (tmp)
@@ -720,16 +720,16 @@ static void handle_internal(u16 tok)
 				iname,lineno, offs2, tmp);
 #endif
 
-			offs2=(unsigned long)offs1-(unsigned long)opc;
+			offs2=offs1-(opc-ostart);
 			emit_offset(offs2);
 			offs2=tmp;
 		}
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case OF:
 		emit_token("b(of)");
-		dpushtype(kOf, (unsigned long)(opc-ostart));
+		dpushtype(kOf, opc-ostart);
 		emit_offset(0);
 		break;
 
@@ -738,18 +738,18 @@ static void handle_internal(u16 tok)
 		emit_token("b(endof)");
 
 		offs2=dpoptype(kCaseEndOf);
-		dpushtype(kCaseEndOf, (unsigned long)(opc-ostart)); /* push location of "endof" offset */
+		dpushtype(kCaseEndOf, opc-ostart); /* push location of "endof" offset */
 		if (offs2 == 0)
 			emit_offset(0); /* signify "case" statement */
 		else
 			emit_offset(offs2-(opc-ostart)); /* emit offset to previous "endof" or "case" offset */
 
-		offs2=(unsigned long)(opc-ostart); /* location of after offset of "endof" */
-		opc=(u8 *)(ostart+offs1); /* goto location of "of" offset */
+		offs2=opc-ostart; /* location of after offset of "endof" */
+		opc=ostart+offs1; /* goto location of "of" offset */
 		offs1=offs2-offs1;
 		emit_offset(offs1); /* offset of "of" points to after offset of "endof" */
 
-		opc=(u8 *)(ostart+offs2); /* location of after offset of "endof" */
+		opc=ostart+offs2; /* location of after offset of "endof" */
 		break;
 
 	case HEADERLESS:
@@ -807,7 +807,7 @@ static void handle_internal(u16 tok)
 
 	case IF:
 		emit_token("b?branch");
-		dpushtype(kIf, (unsigned long)opc);
+		dpushtype(kIf, opc-ostart);
 		emit_offset(0);
 		break;
 
@@ -821,25 +821,25 @@ static void handle_internal(u16 tok)
 	case LOOP:
 		emit_token("b(loop)");
 		offs1=dpoptype(kDoOffset);
-		offs2=offs1-(unsigned long)opc;
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		offs1=(unsigned long)opc;
-		opc=(u8 *)dpoptype(kDo);
-		offs2=offs1-(unsigned long)opc;
+		offs1=opc-ostart;
+		opc=ostart+dpoptype(kDo);
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case CLOOP:
 		emit_token("b(+loop)");
 		offs1=dpoptype(kDoOffset);
-		offs2=offs1-(unsigned long)opc;
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		offs1=(unsigned long)opc;
-		opc=(u8 *)dpoptype(kDo);
-		offs2=offs1-(unsigned long)opc;
+		offs1=opc-ostart;
+		opc=ostart+dpoptype(kDo);
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case GETTOKEN:
@@ -875,36 +875,35 @@ static void handle_internal(u16 tok)
 
 	case UNTIL:
 		emit_token("b?branch");
-		emit_offset(dpoptype(kBegin)-(unsigned long)opc);
+		emit_offset(dpoptype(kBegin)-(opc-ostart));
 		break;
 
 	case WHILE:
 		emit_token("b?branch");
-		dpushtype(kWhile, (unsigned long)opc);
+		dpushtype(kWhile, opc-ostart);
 		emit_offset(0);
 		break;
 
 	case REPEAT:
 		emit_token("bbranch");
 		offs2=dpoptype(kWhile);
-		offs1=dpoptype(kBegin);
-		offs1-=(unsigned long)opc;
+		offs1=dpoptype(kBegin)-(opc-ostart);
 		emit_offset(offs1);
 
 		emit_token("b(>resolve)");
-		offs1=(unsigned long)opc;
-		opc=(u8 *)offs2;
+		offs1=opc-ostart;
+		opc=ostart+offs2;
 		emit_offset(offs1-offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case THEN:
 		emit_token("b(>resolve)");
-		offs1=(unsigned long)opc;
-		opc=(u8 *)dpoptypes(kIf, kElse);
-		offs2=offs1-(unsigned long)opc;
+		offs1=opc-ostart;
+		opc=ostart+dpoptypes(kIf, kElse);
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 		break;
 
 	case TO:
@@ -1061,7 +1060,7 @@ static void handle_internal(u16 tok)
 	case FCODE_V1:
 		printf(FILE_POSITION "using version1 header\n", iname, lineno);
 		emit_token("version1");
-		dpushtype(kFCodeHeader,(unsigned long)opc);
+		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
 		offs16=FALSE;
 		break;
@@ -1070,7 +1069,7 @@ static void handle_internal(u16 tok)
 	case FCODE_V2:
 	case FCODE_V3: /* Full IEEE 1275 */
 		emit_token("start1");
-		dpushtype(kFCodeHeader,(unsigned long)opc);
+		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -1079,7 +1078,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 0 not supported.",
 				iname, lineno);
 		emit_token("start0");
-		dpushtype(kFCodeHeader,(unsigned long)opc);
+		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -1088,7 +1087,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 2 not supported.",
 			iname, lineno);
 		emit_token("start2");
-		dpushtype(kFCodeHeader,(unsigned long)opc);
+		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -1097,7 +1096,7 @@ static void handle_internal(u16 tok)
 		printf (FILE_POSITION "warning: spread of 4 not supported.",
 			iname, lineno);
 		emit_token("start4");
-		dpushtype(kFCodeHeader,(unsigned long)opc);
+		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
 		offs16=TRUE;
 		break;
@@ -1255,7 +1254,7 @@ static void handle_internal(u16 tok)
 		/* IF */
 		emit_token("b?branch");
 
-		dpushtype(kAbort,(unsigned long)opc);
+		dpushtype(kAbort, opc-ostart);
 		emit_offset(0);
 #endif
 		emit_token("b(\")");
@@ -1268,11 +1267,11 @@ static void handle_internal(u16 tok)
 #ifdef BREAK_COMPLIANCE
 		/* THEN */
 		emit_token("b(>resolve)");
-		offs1=(unsigned long)opc;
-		opc=(u8 *)dpoptype(kAbort);
-		offs2=offs1-(unsigned long)opc;
+		offs1=opc-ostart;
+		opc=ostart+dpoptype(kAbort);
+		offs2=offs1-(opc-ostart);
 		emit_offset(offs2);
-		opc=(u8 *)offs1;
+		opc=ostart+offs1;
 #endif
 		break;
 
