@@ -493,6 +493,50 @@ static void encode_file( const char *filename )
 	fclose( f );
 }
 
+static void validate_to_target(u16 type)
+{
+	if (in_to) {
+		switch (type) {
+		case VARIABLE:
+			printf(FILE_POSITION "warning: Applying \"to\" to a VARIABLE (%s) is not recommended; use ! instead.\n",
+					iname, lineno, (char *)statbuf);
+			break;
+		case CONST:
+			printf(FILE_POSITION "warning: Applying \"to\" to a CONST (%s) is not recommended.\n",
+					iname, lineno, (char *)statbuf);
+			break;
+		case VALUE:
+		case DEFER:
+			break;
+		default:
+			gGotError = 1;
+			printf(FILE_POSITION "error: Applying \"to\" to \"%s\" is not valid.\n",
+					iname, lineno, (char *)statbuf);
+			break;
+		}
+		in_to=FALSE;
+	}
+}
+
+static void validate_instance(u16 type)
+{
+	if (in_instance) {
+		switch (type) {
+		case VALUE:
+		case VARIABLE:
+		case DEFER:
+		case BUFFER:
+			break;
+
+		default:
+			gGotError = 1;
+			printf(FILE_POSITION "error: Applying \"instance\" to \"%s\" is not valid.\n",
+					iname, lineno, (char *)statbuf);
+			break;
+		}
+		in_instance=FALSE;
+	}
+}
 
 static void handle_internal(u16 tok)
 {
@@ -1310,51 +1354,6 @@ static void handle_internal(u16 tok)
 		printf(FILE_POSITION "error: Unimplemented control word '%s'\n",
 				iname, lineno, statbuf);
 		ERROR;
-	}
-}
-
-static void validate_to_target(u16 type)
-{
-	if (in_to) {
-		switch (type) {
-		case VARIABLE:
-			printf(FILE_POSITION "warning: Applying \"to\" to a VARIABLE (%s) is not recommended; use ! instead.\n",
-					iname, lineno, (char *)statbuf);
-			break;
-		case CONST:
-			printf(FILE_POSITION "warning: Applying \"to\" to a CONST (%s) is not recommended.\n",
-					iname, lineno, (char *)statbuf);
-			break;
-		case VALUE:
-		case DEFER:
-			break;
-		default:
-			gGotError = 1;
-			printf(FILE_POSITION "error: Applying \"to\" to \"%s\" is not valid.\n",
-					iname, lineno, (char *)statbuf);
-			break;
-		}
-		in_to=FALSE;
-	}
-}
-
-static void validate_instance(u16 type)
-{
-	if (in_instance) {
-		switch (type) {
-		case VALUE:
-		case VARIABLE:
-		case DEFER:
-		case BUFFER:
-			break;
-
-		default:
-			gGotError = 1;
-			printf(FILE_POSITION "error: Applying \"instance\" to \"%s\" is not valid.\n",
-					iname, lineno, (char *)statbuf);
-			break;
-		}
-		in_instance=FALSE;
 	}
 }
 
