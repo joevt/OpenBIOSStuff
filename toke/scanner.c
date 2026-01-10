@@ -1382,6 +1382,14 @@ static void handle_internal(u16 tok)
 		break;
 	}
 
+	case BEGINEXTERN:
+		dpushtype(kExtern,opc-ostart);
+		break;
+
+	case ENDEXTERN:
+		opc=ostart+dpoptype(kExtern);
+		break;
+
 	default:
 		printf(FILE_POSITION "error: Unimplemented control word '%s'\n",
 				iname, lineno, statbuf);

@@ -38,7 +38,8 @@ enum {
 	kOf,
 	kIf,
 	kWhile,
-	kToke
+	kToke,
+	kExtern,
 };
 
 

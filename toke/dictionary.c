@@ -646,6 +646,8 @@ void init_dictionary(void)
 
 	add_special(ENCODEFILE,	"encode-file");
 	add_special(IMPORT, "import");
+	add_special(BEGINEXTERN,	"extern[");
+	add_special(ENDEXTERN,	"]extern");
 
 	/* pci header generation is done differently 
 	 * across the available tokenizers. We try to
