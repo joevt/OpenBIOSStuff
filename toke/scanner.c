@@ -106,6 +106,7 @@ void pci_reset( void ) {
 bool offs16=TRUE;
 static bool intok=FALSE, in_to=FALSE, in_instance=FALSE;
 static token_t * incolon=NULL;
+static bool incode=FALSE;
 bool haveend=FALSE;
 
 static u8 *skipws(u8 *str)
@@ -396,7 +397,7 @@ static int get_number(long *result)
 	u8 lbase, *until;
 	long val;
 
-	lbase=intok?0x10:base;
+	lbase=(intok||incode)?0x10:base;
 	val=parse_number(statbuf, &until, lbase);
 
 #if DEBUG_SCANNER
@@ -437,7 +438,7 @@ static token_t * create_word(u16 tok)
 	unsigned long wlen;
 	token_t * token;
 
-	if (incolon) {
+	if (incolon || intok || incode || in_to || in_instance) {
 		printf(FILE_POSITION "error: creating words not allowed "
 			"in colon definition.\n", iname, lineno);
 		ERROR;
@@ -598,6 +599,35 @@ static void handle_internal(u16 tok)
 			reset_locals();
 		}
 		incolon=NULL;
+		break;
+
+	case CODE:
+		create_word(tok);
+		emit_token("b(code)");
+		break;
+
+	case CODE_S:
+		incode=TRUE;
+		emit_token("code,s");
+		dpushtype(kCode, opc-ostart);
+		emit_num32(0);
+		break;
+
+	case CODEEND:
+	case CODESEMICOLON:
+		if (!incode) {
+			printf(FILE_POSITION "\"c;\" should only be used inside a code definition\n",
+				iname, lineno);
+		} else {
+			if (tok == CODESEMICOLON)
+				emit_num32(0x4e800020);
+			offs1=opc-ostart;
+			offs2=dpoptype(kCode);
+			opc=ostart+offs2;
+			emit_num32((u32)(offs1-offs2));
+			opc=ostart+offs1;
+		}
+		incode=FALSE;
 		break;
 
 	case ASSIGN:
@@ -1497,6 +1527,8 @@ void tokenize(void)
 		if (!get_number(&val)) {
 			if (intok)
 				dpushtype(kToke, val);
+			else if (incode)
+				emit_num32((u32)val);
 			else {
 				validate_to_target(0);
 				validate_instance(0);

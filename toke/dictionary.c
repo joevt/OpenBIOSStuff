@@ -351,7 +351,7 @@ void init_dictionary(void)
 	add_token_with_type( 0x0bc, "b(defer)", COLON );
 	add_token_with_type( 0x0bd, "b(buffer:)", COLON );
 	add_token_with_type( 0x0be, "b(field)", COLON );
-	add_token( 0x0bf, "b(code)" ); // historical
+	add_token_with_type( 0x0bf, "b(code)", COLON ); // historical
 	add_token_with_type( 0x0c0, "instance", COLON );
 	add_token_with_type( 0x0c2, "b(;)", COLON );
 	add_token_with_type( 0x0c3, "b(to)", COLON );
@@ -668,6 +668,12 @@ void init_dictionary(void)
 	add_special(PCIENTRY, "pci-entry");
 
 	if (mac_rom) {
+		add_token_with_type( 0xf8, "code,s", COLON );
+		add_special(CODE, 	"code");
+		add_special(CODE_S, 	"code<<<"); // code,s
+		add_special(CODESEMICOLON, 	"c;");
+		add_special(CODEEND, 	">>>"); // end-code
+
 		add_special(PARAMS, "{" );
 		add_special(ASSIGN, "->" );
 		locals[0] = add_token_with_type( 0x410, "", LOCAL );

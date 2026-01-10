@@ -40,6 +40,7 @@ enum {
 	kWhile,
 	kToke,
 	kExtern,
+	kCode,
 };
 
 
