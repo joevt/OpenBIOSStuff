@@ -46,7 +46,7 @@ int gPass;
 
 int indent=0, use_tabs=0, verbose=0, decode_all=0, ignore_len=0, mac_rom=0, linenumbers=0;
 s64 romstartoffset = 0;
-u32 addressmask;
+u32 addressmask = 0xffffff;
 
 bool offs16;
 bool got_start;
