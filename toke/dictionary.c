@@ -46,6 +46,23 @@ static token_t *dictionary=NULL;
 static token_t *forthwords=NULL;
 static token_t *locals[8] = {0};
 
+static token_t *lookup_fcode(u16 num)
+{
+	token_t *curr;
+
+	for (curr=dictionary; curr!=NULL; curr=curr->next)
+		if (curr->fcode == num)
+			break;
+
+	if (curr) {
+		return curr;
+	}
+#ifdef DEBUG_TOKE
+	printf("warning: token 0x%03X does not exist.\n", num);
+#endif
+	return NULL;
+}
+
 static token_t *lookup_token_dict0(char *name, token_t *dict)
 {
 	token_t *curr;
@@ -54,8 +71,14 @@ static token_t *lookup_token_dict0(char *name, token_t *dict)
 		if (curr->type != UNDEFINED_COLON && !strcasecmp(name,(char *)curr->name))
 			break;
 
-	if (curr)
+	if (curr) {
+		if (dict == dictionary) {
+			token_t * fcode = lookup_fcode(curr->fcode);
+			if (fcode != curr && curr->alias != fcode)
+				printf("warning: token '%s' uses fcode 0x%03X of token '%s'.\n", name, curr->fcode, fcode->name);
+		}
 		return curr;
+	}
 #ifdef DEBUG_TOKE
 	printf("warning: token '%s' does not exist.\n", name);
 #endif
@@ -103,6 +126,7 @@ token_t * add_token_dict(u16 number, char *name, token_t **dict, u16 type)
 	curr->fcode=number;
 	curr->type=type;
 	curr->name=name;
+	curr->alias=NULL;
 
 	if (*dict) {
 		(*dict)->prev = curr;
@@ -141,6 +165,12 @@ token_t * add_token_with_type(u16 number, char *name, u16 type)
 static token_t * add_special(u16 number, char *name)
 {
 	return add_token_dict(number, name, &forthwords, 0);
+}
+
+static void set_alias(token_t * tok1, token_t * tok2)
+{
+	tok1->alias = tok2;
+	tok2->alias = tok1;
 }
 
 const char *token_type_string(token_t *tok)
@@ -197,10 +227,14 @@ void init_dictionary(void)
 	add_token_with_type( 0x024, "or", CODE );
 	add_token_with_type( 0x025, "xor", CODE );
 	add_token_with_type( 0x026, "invert", CODE );
-	add_token_with_type( 0x027, "<<", CODE ); // alias lshift (same fcode)
-	add_token_with_type( 0x027, "lshift", CODE );
-	add_token_with_type( 0x028, ">>", CODE ); // alias rshift (same fcode)
-	add_token_with_type( 0x028, "rshift", CODE );
+set_alias(
+	add_token_with_type( 0x027, "<<", CODE ), // alias lshift (same fcode)
+	add_token_with_type( 0x027, "lshift", CODE )
+);
+set_alias(
+	add_token_with_type( 0x028, ">>", CODE ), // alias rshift (same fcode)
+	add_token_with_type( 0x028, "rshift", CODE )
+);
 	add_token_with_type( 0x029, ">>a", CODE );
 	add_token_with_type( 0x02a, "/mod", CODE );
 	add_token_with_type( 0x02b, "u/mod", CODE );
@@ -492,8 +526,10 @@ void init_dictionary(void)
 	add_token_with_type( 0x207, "find-method", COLON );
 	add_token_with_type( 0x208, "call-package", COLON );
 	add_token_with_type( 0x209, "$call-parent", COLON );
-	add_token_with_type( 0x20a, "my-parent", COLON ); /* This is the correct token for 0x20a. Not sure where my-package comes from. */
-	add_token_with_type( 0x20a, "my-package", COLON ); // not in Mac ROM
+set_alias(
+	add_token_with_type( 0x20a, "my-parent", COLON ), /* This is the correct token for 0x20a. Not sure where my-package comes from. */
+	add_token_with_type( 0x20a, "my-package", COLON ) // not in Mac ROM; my-parent is the preferred name so declare it later
+);
 	add_token_with_type( 0x20b, "ihandle>phandle", COLON );
 	add_token_with_type( 0x20d, "my-unit", COLON );
 	add_token_with_type( 0x20e, "$call-method", COLON );

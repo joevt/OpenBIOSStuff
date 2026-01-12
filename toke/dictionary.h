@@ -141,6 +141,7 @@ typedef struct token {
 	u16 type;
 	struct token *next;
 	struct token *prev;
+	struct token *alias;
 } token_t;
 
 typedef struct macro {
