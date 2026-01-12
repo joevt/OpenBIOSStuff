@@ -44,6 +44,7 @@
 #include "toke.h"
 #include "stack.h"
 #include "emit.h"
+#include "stream.h"
 
 extern bool offs16;
 extern int verbose;
@@ -131,14 +132,28 @@ int emit_offset(long offs)
 {
 	if (offs16)
 	{
-		if (offs < -32768 || offs > 32767)
-			printf("warning: 16 bit offset is out of range\n");
+		if (offs < -32768 || offs > 32767) {
+			printf(FILE_POSITION "warning: 16 bit offset (%ld) is out of range (output position 0x%05X).\n",
+			    iname, lineno, offs, (int)(opc - ostart));
+			gGotError = 1;
+			if (offs < -32768)
+				offs = -32768;
+			else if (offs > 32767)
+				offs = 32767;
+		}
 		emit_num16(offs);
 	}
 	else
 	{
-		if (offs < -128 || offs > 127)
-			printf("warning: 8 bit offset is out of range\n");
+		if (offs < -128 || offs > 127) {
+			printf(FILE_POSITION "warning: 8 bit offset (%ld) is out of range (output position 0x%05X).\n",
+			    iname, lineno, offs, (int)(opc - ostart));
+			gGotError = 1;
+			if (offs < -128)
+				offs = -128;
+			else if (offs > 127)
+				offs = 127;
+		}
 		emit_byte(offs);
 	}
 	

@@ -58,4 +58,6 @@ extern void mark_defined(token_t * tok);
 extern void reset_locals(void);
 extern void set_local(int i, char* name);
 
+extern bool gGotError;
+
 #endif   /* _H_TOKE */

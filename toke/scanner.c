@@ -67,7 +67,6 @@ int strcasecmp(const char * str1, const char * str2)
 extern u8 *start, *pc, *end, *opc, *ostart;
 extern int verbose, noerrors;
 extern int lowercase;
-extern bool gGotError;
 
 u8   *statbuf=NULL;
 u16  nextfcode;
