@@ -623,7 +623,7 @@ static void handle_internal(u16 tok)
 			offs1=opc-ostart;
 			offs2=dpoptype(kCode);
 			opc=ostart+offs2;
-			emit_num32((u32)(offs1-offs2));
+			emit_num32((u32)(offs1-offs2-4));
 			opc=ostart+offs1;
 		}
 		incode=FALSE;
