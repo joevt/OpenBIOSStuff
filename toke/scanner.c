@@ -1153,7 +1153,7 @@ static void handle_internal(u16 tok)
 
 	case VERSION1:
 	case FCODE_V1:
-		printf(FILE_POSITION "using version1 header\n", iname, lineno);
+		//printf(FILE_POSITION "warning: using version1 header\n", iname, lineno);
 		emit_token("version1");
 		dpushtype(kFCodeHeader, opc-ostart);
 		emit_fcodehdr();
