@@ -35,13 +35,14 @@ make 2&gt;&amp;1
 
 # Don't need this anymore since we're on github.
 
-cd  /Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS
+cd  "/Volumes/Updates/Docs/Open_Firmware_and_Forth/OpenBIOS"
 if [[ -f joevt-OpenBIOSStuff.zip ]]; then
 	echo "rm"
 	rm joevt-OpenBIOSStuff.zip
 fi
-find . -path "*/joevt-OpenBIOSStuff/*" -not -name ".DS_Store" -not -path "*/DerivedData*" \
+find . -type f -path "*/joevt-OpenBIOSStuff/*" -not -name ".DS_Store" -not -path "*/DerivedData*" \
 -not -path "*/obj-amd64*" -not -path "*/xcuserdata*" -not -path "*/project.xcworkspace*" \
+ -not -path "*/.git/*" -not -path "*/.git/" -not -path "*/xcshareddata*" \
 -print0 | xargs -0 zip -g joevt-OpenBIOSStuff.zip
 
 #=========================================================================================
