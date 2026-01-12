@@ -34,7 +34,8 @@ enum {
 	kDo,			/* b(do), b(?do) */
 	kDoOffset,		/* b(do), b(?do) */
 	kElse,
-	kCaseEndOf,		/* b(case), b(endof) */
+	kCase,			/* b(case) */
+	kEndOf,			/* b(endof) */
 	kOf,
 	kIf,
 	kWhile,
@@ -51,7 +52,6 @@ int emit_num32(u32 num);
 int emit_num16(u16 num);
 int emit_offset(long offs);
 int emit_num(u32 num);
-s16 receive_offset(void);
 int emit_string(u8 *string, size_t cnt);
 int emit_fcodehdr(void);
 int finish_fcodehdr(void);

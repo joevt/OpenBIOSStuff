@@ -183,19 +183,6 @@ int emit_num(u32 num)
 	}
 }
 
-
-s16 receive_offset(void)
-{
-	s16 offs=0;
-	
-	if (offs16) {
-		offs=((*opc)<<8)|(*(opc+1));
-	} else
-		offs=(*opc);
-
-	return offs;
-}
-
 int emit_string(u8 *string, size_t cnt)
 {
 	unsigned int i=0;

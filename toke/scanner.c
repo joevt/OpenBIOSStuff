@@ -788,7 +788,8 @@ static void handle_internal(u16 tok)
 
 	case CASE:
 		emit_token("b(case)");
-		dpushtype(kCaseEndOf, 0);
+		dpushtype(kCase, opc-ostart);
+		dpushtype(kEndOf, 0);
 		break;
 
 	case ENDCASE:
@@ -797,15 +798,8 @@ static void handle_internal(u16 tok)
 
 		offs1=opc-ostart;
 
-		offs2=dpoptype(kCaseEndOf);
-		while (offs2) {
-			long tmp;
-
+		while ((offs2=dpoptype(kEndOf))) {
 			opc=ostart+offs2; /* location of offset of endof offset */
-			tmp=receive_offset(); /* offset to location */
-
-			if (tmp)
-				tmp += (opc-ostart);
 
 #if DEBUG_SCANNER
 			printf (FILE_POSITION "debug: endcase endof offset 0x%lx   previous endof offset 0x%lx\n",
@@ -814,9 +808,9 @@ static void handle_internal(u16 tok)
 
 			offs2=offs1-(opc-ostart);
 			emit_offset(offs2);
-			offs2=tmp;
 		}
 		opc=ostart+offs1;
+		dpoptype(kCase);
 		break;
 
 	case OF:
@@ -829,12 +823,8 @@ static void handle_internal(u16 tok)
 		offs1=dpoptype(kOf); /* location of "of" offset */
 		emit_token("b(endof)");
 
-		offs2=dpoptype(kCaseEndOf);
-		dpushtype(kCaseEndOf, opc-ostart); /* push location of "endof" offset */
-		if (offs2 == 0)
-			emit_offset(0); /* signify "case" statement */
-		else
-			emit_offset(offs2-(opc-ostart)); /* emit offset to previous "endof" or "case" offset */
+		dpushtype(kEndOf, opc-ostart); /* push location of "endof" offset */
+		emit_offset(0);
 
 		offs2=opc-ostart; /* location of after offset of "endof" */
 		opc=ostart+offs1; /* goto location of "of" offset */
