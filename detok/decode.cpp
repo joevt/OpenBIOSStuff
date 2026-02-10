@@ -471,6 +471,14 @@ static void decode_start(void)
 	u32 i;
 	bool problem=TRUE;
 	bool had_start=got_start;
+	u32 instruction = 0;
+
+	if ((current_token_pos & 3)) {
+		// token position might be inside a PowerPC instruction
+		set_streampos(current_token_pos & ~3);
+		instruction = get_num32();
+		set_streampos(current_token_pos+1);
+	}
 
 	/* current_token_pos */			/* 0 */
 	fcformat=get_num8();			/* 1 */
@@ -493,7 +501,12 @@ static void decode_start(void)
 			for (i=0; i < numCheckSumBytes; i++)
 				checksum+=get_num8();
 
-			if (current_token_pos==0 || fcchecksum==checksum || fcformat==8)
+			if (
+				current_token_pos==0 || fcchecksum==checksum || (
+					fcformat==8
+					&& ((instruction & 0xFC000002) != 0x48000000) // not a b or blr instruction
+				)
+			)
 			{
 				fclen=newEndPos;
 				indent=0;
