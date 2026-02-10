@@ -177,7 +177,7 @@ DumpMacRomDoErrors () {
 		fi
 	fi
 
-	#echo "# " detok -t -v -a -n -o -i -m '"'"${macrom}"'"' -s '"'"${romStartOffset}"'"' '"'"${romFile}"'"' " 2> " '"'"${TempFolder}/errors.txt"'"' " > " '"'"${TempFolder}/All0.txt"'"'
+	echo "# " detok -t -v -a -n -o -i -m '"'"${macrom}"'"' -s '"'"${romStartOffset}"'"' '"'"${romFile}"'"' " 2> " '"'"${TempFolder}/errors.txt"'"' " > " '"'"${TempFolder}/All0.txt"'"' > "${TempFolder}/Commands.txt"
 	detok -t -v -a -n -o -i -m "${macrom}" -s "${romStartOffset}" "${romFile}" 2> "${TempFolder}/errors.txt" > "${TempFolder}/All0.txt"
 
 	# Add file command to errors
